@@ -1,0 +1,11 @@
+metadata:
+  title: Parenting plan
+  short title: Parenting plan
+  comment: This program helps you create a plan to set parental responsibilities (formerly custody) and parenting time (formerly visitation).
+  authors:
+    - Jim Graszer
+    - Matt Newsted
+---
+include:
+  - parenting_plan_questions.yml
+---
