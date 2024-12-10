@@ -7,5 +7,747 @@ metadata:
     - Matt Newsted
 ---
 include:
+  - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.ILAO:ilao-interview-framework.yml
+  - docassemble.ILAO:shared-basic-questions.yml
   - parenting_plan_questions.yml
+---
+objects:
+  - users: ALPeopleList.using(there_are_any=True)
+  - other_parties: ALPeopleList.using(there_are_any=True)
+  - employer: ALIndividual
+  - other_employer: ALIndividual
+  - children: ALPeopleList.using(there_are_any=True)
+  - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
+---
+code: |
+  al_form_type = 'existing_case'
+  ilao_easy_form_title = "Parenting Plan"
+  ilao_easy_form_url = "https://www.illinoislegalaid.org/legal-information/parenting-plan"
+  form_name = "Parenting Plan"
+  github_user = 'IllinoisLegalAidOnline'
+  github_repo_name = 'docassemble-ParentingPlan'
+  allowed_courts = ['Circuit']
+---
+sections:
+  - section_intro: Start
+  - section_case: Case info
+  - section_family: Family members
+  - section_decisions: Decision making
+  - section_download: Download
+---
+#################### Interview order #####################
+mandatory: True
+code: |
+  nav.set_section('section_intro')
+  sees_nav_bar
+  set_progress(5)
+  how_to_use
+  accept_terms
+  about_screen
+  if family_case == False:
+    family_kickout
+  
+  nav.set_section('section_case')
+  set_progress(15)
+  plan_type
+  case_county
+  case_number
+
+  nav.set_section('section_family')
+  set_progress(15)
+  users[0].name.first
+  if hide_contact == False:
+    users[0].address.address
+  users[0].phone_number
+  if has_employer:
+    employer.name.first
+
+
+  other_parties[0].name.first
+  if has_other_address:
+    other_parties[0].address.address
+  other_parties[0].phone_number
+  if has_other_employer:
+    other_employer.name.first
+
+  children.gather()
+
+
+  nav.set_section('section_decisions')
+  set_progress(40)
+  eduction_decisions
+  health_decisions
+  religious_decisions
+  activities_decisions
+  first_refusal
+  communication
+  primary_parent
+  residential_address
+  mediation
+
+
+
+  set_progress(100)
+  nav.set_section('section_download')
+  forms_assembling
+  get_docs_screen
+---
+id: welcome
+continue button field: sees_nav_bar
+question: |
+  Parenting Plan
+subquestion: |
+  Welcome to Illinois Legal Aid Online's **${form_name}** Easy Form.
+
+  This program helps you make forms that provide financial information and documents to the other party in family law cases.
+  
+  If you are in a court case for divorce, child support, or temporary maintenance, you and the other person will probably have to share information about your income, property, and expenses. 
+---
+id: how to use
+continue button field: how_to_use
+question: |
+  Instructions
+subquestion: |
+  To complete this program, you will need to know:
+
+
+  It could take 30 minutes to 60 minutes to finish this program. You can log in and save your work to return to later. 
+ 
+  ${ collapse_template(help_example) }  
+
+  Click on **{green words}** to learn what they mean. Some questions have a question mark in a circle ${ fa_icon("question-circle", color_css="#0dcaf0" ) } that also gives help.
+---
+template: help_example
+subject: |
+  **You can expand sections like this to show more information.**
+content: |  
+  This is an example of help. Click again to hide.
+---
+id: about 
+continue button field: about_screen
+question: |
+  About the *Parenting Plan*
+subquestion: |
+  The *${form_name}* is a very long form.
+
+
+
+
+  A Parenting Plan contains information about who will make decisions for the children and a schedule for when the children are with each parent.
+  
+  If you have completed the Parenting Plan by the time you are ready to file your case, you can file it with your petition (example: divorce, parental responsibilities, etc.).
+  
+  If not, you must file it within 120 days of the date you file your petition.
+  
+  Learn more about Parenting plans.
+---
+id: family case 
+question: |
+  Do you have a family law case in Illinois?
+subquestion: |
+  The case can be ongoing or one where a final Judgment or Order was entered.
+fields:
+  - no label: family_case
+    datatype: yesnoradio
+---
+id: family case kickout
+event: family_kickout
+question: |
+  Sorry
+subquestion: |
+  You can only use this program if you have a family law case in Illinois.
+
+  Use **[Get Legal Help](https://www.illinoislegalaid.org/get-legal-help)** to find free or low-cost legal services in your area.
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+########################## CASE INFO #######################
+id: parenting plan type 
+question: |
+  Whose Parenting Plan is this?
+fields:
+  - Parenting plan: plan_type
+    datatype: checkboxes 
+    none of the above: False 
+    choices: 
+      - Yours
+      - The other parent's
+      - An agreed Parenting Plan
+      - Unsure
+---
+id: party label
+question: |
+  What is your role in the case?
+subquestion: |
+  ${ collapse_template(which_party) }  
+field: party_label
+choices:
+  - Petitioner: petitioner
+  - Plaintiff: plaintiff
+  - Respondent: respondent
+  - Defendant: defendant
+---
+template: which_party
+subject: |
+  **Learn more about party labels**
+content: |
+  If you filed a new case, you are either the Petitioner or the Plaintiff.
+
+  If someone filed the case against you, you are either the Respondent or the Defendant.
+
+  Most family law cases use Petitioner and Respondent.
+  
+  The other court papers in the case should help you figure it out. Look at the top (the caption)
+  of the Petition, Complaint, or Order. That form should have a label by your name.
+---
+id: case county
+question: |
+  In which county was this case filed?
+fields:
+  - County: case_county
+    code:
+      court_list._load_courts()["address_county"].unique()
+---
+id: case number
+question: |
+  What is the case number?
+subquestion: |
+  ${ collapse_template(case_number_help) }
+fields:
+  - Case number: case_number
+    maxlength: 19
+---
+template: case_number_help
+subject: |
+  **Learn about case numbers**
+content: |  
+  The case number should be on your court papers. Look at the Complaint or Petition, or the Summons if you received one. It is usually in the top-right part of the first page.
+  
+  If you started the case, the court clerk should have given you the case number.
+  
+  In this example, the case number is **2022 EXAMPLE 123**.
+  
+  [FILE case_number_example.png, 100%, Summons form showing case number]
+---
+########################## FAMILY  ######################
+id: your name
+sets:
+    - users[0].name.first
+    - users[0].name.last
+    - users[0].name.middle
+    - users[0].name.suffix
+question: |
+  What is your name?
+fields:
+  - code: |
+      users[0].name_fields()
+---
+id: hide contact 
+question: |
+  Are your address and phone number protected by court order because of domestic violence or abuse?
+subquestion: |
+  If your contact information does not appear on other court papers because you have a protective order, you do not have to list them on your *${form_name}*. 
+
+  Click **No** to list your address and phone number on your *${form_name}*.
+fields:
+  - no label: hide_contact
+    datatype: yesnoradio
+---
+id: users address
+sets:
+  - users[0].address.address
+  - users[0].address.city
+  - users[0].address.state
+  - users[0].address.zip
+question: |
+  What is your address?
+subquestion: |
+  **This address will appear on your form.** If you do not want this, click **Back** to keep your address hidden.
+fields:
+  - Street address: users[0].address.address
+    address autocomplete: True
+  - Address line 2: users[0].address.unit
+    required: False
+  - City: users[0].address.city
+  - State: users[0].address.state
+    code: |
+      states_list()
+    default: IL      
+  - ZIP code: users[0].address.zip
+---
+id: your contact information
+question: |
+  What is your contact information?
+subquestion: |
+  The court or other parties might need to contact you about this case.
+
+  **This information will appear on your court forms.**
+  
+  If you do not want to list a phone number on your forms, leave it blank.
+
+  If you have an email address, you must list it. Be sure to check your email daily, otherwise you may miss important court documents or information about your case.
+
+  ${ collapse_template(contact_info_help) }  
+fields:  
+  - Phone number: users[0].phone_number
+    datatype: al_international_phone
+    required: False
+  - label: |
+      Do you have an email address?
+    field: users[0].has_email_address      
+    datatype: yesnoradio
+  - note: |
+      This email address will appear on your court forms. Be sure to check 
+      this email daily, otherwise you may miss important information about 
+      your case.
+    show if:
+      variable: users[0].has_email_address
+      is: True
+  - Email address: users[0].email    
+    datatype: email
+    show if: 
+      variable: users[0].has_email_address
+      is: True
+---
+template: contact_info_help
+subject: |
+  **What if I don't want to list my email address?**
+content: |  
+  If you do not want to enter your personal email address, you can create a new email account to get email about your case.
+  
+  To make a new email account try one of these email services:
+  
+  * [**Gmail**](https://accounts.google.com/SignUp)
+  * [**Outlook**](https://outlook.live.com/owa/?nlp=1&signup=1)
+  * [**Yahoo**](https://login.yahoo.com/account/create?.lang=en-US&.intl=us)
+---
+id: your employer
+question: |
+  Do you have an employer?
+subquestion: |
+  If you do not currently have an employer, select **No**.
+fields:
+  - no label: has_employer
+    datatype: yesnoradio
+---
+sets:
+  - employer.name.first
+id: your employer info 
+question: |
+  Employer information
+fields: 
+  - code: |
+      employer.name_fields(person_or_business='unsure')
+  - Street address: employer.address.address
+    address autocomplete: True
+  - Address line 2: employer.address.unit
+    required: False
+  - City: employer.address.city
+  - State: employer.address.state
+    code: |
+      states_list()
+    default: IL
+  - ZIP code: employer.address.zip
+  - Phone number: employer.phone_number
+    datatype: al_international_phone
+    required: False
+---
+id: other parties name
+sets:
+    - other_parties[0].name.first
+    - other_parties[0].name.last
+    - other_parties[0].name.middle
+    - other_parties[0].name.suffix
+question: |
+  What is the other parent's name?
+fields:
+  - code: |
+      other_parties[0].name_fields()
+---
+id: other parties address
+question: |
+  Is ${other_parties[0].name.full(middle="full")}'s address listed on other court forms in this case?
+fields:
+  - no label: has_other_address
+    datatype: yesnoradio
+---
+id: other_parties address
+sets:
+  - other_parties[0].address.address
+  - other_parties[0].address.city
+  - other_parties[0].address.state
+  - other_parties[0].address.zip
+question: |
+  What is ${other_parties[0].name.full(middle="full")}'s address?
+fields:
+  - Street address: other_parties[0].address.address
+    address autocomplete: True
+  - Address line 2: other_parties[0].address.unit
+    required: False
+  - City: other_parties[0].address.city
+  - State: other_parties[0].address.state
+    code: |
+      states_list()
+    default: IL      
+  - ZIP code: other_parties[0].address.zip
+---
+id: your contact information
+question: |
+  What is ${other_parties[0].name.full(middle="full")}'s contact information?
+fields:  
+  - Phone number: other_parties[0].phone_number
+    datatype: al_international_phone
+    required: False
+  - Email address: other_parties[0].email    
+    datatype: email
+    required: False
+---
+id: other parties employment
+question: |
+  Is ${other_parties[0].name.full(middle="full")}'s employed?
+fields:
+  - no label: has_other_employer
+    datatype: yesnoradio
+---
+sets:
+  - other_employer.name.first
+id: other parties employer info 
+question: |
+  Employer information for ${other_parties[0].name.full(middle="full")}
+fields: 
+  - code: |
+      other_employer.name_fields(person_or_business='unsure')
+  - Street address: other_employer.address.address
+    address autocomplete: True
+  - Address line 2: other_employer.address.unit
+    required: False
+  - City: other_employer.address.city
+  - State: other_employer.address.state
+    code: |
+      states_list()
+    default: IL
+  - ZIP code: other_employer.address.zip
+  - Phone number: other_employer.phone_number
+    datatype: al_international_phone
+    required: False
+---
+code: |
+  children[i].name.text
+  children.complete = True
+---
+#### might remove this they must have at least one child to use this program
+id: children
+question: |
+  Are there any children? 
+fields:
+  - no label: children.there_are_any
+    datatype: yesnoradio
+---
+id: add children
+sets:
+  - children[i].name.first
+  - children[i].name.last
+question: |
+  What is the ${ordinal(i)} child's name?
+fields:
+  - code: |
+      children[i].name_fields()    
+  - Age: children[i].age
+    datatype: integer
+    min: 0
+    max: 18
+validation code: |
+  if showifdef("children[i].birthdate") and children[i].age > 18:
+    validation_error("Child must be under 18")
+---
+id: any other children
+question: |
+  Do you have another child with ${other_parties[0].name.full(middle="full")}?
+subquestion: |
+  So far you have told us about ${comma_and_list(children.complete_elements().full_names())}.
+fields:
+  - "Anyone else?": children.there_is_another
+    datatype: yesnoradio
+---
+id: education decisions
+question: |
+  Who will make education decisions for the children?
+subquestion: |
+  Education decisions (includes choice of schools and tutors).
+fields:
+  - Decisions will be made by: eduction_decisions
+    datatype: radio
+    choices:
+      - ${users[0].name.full(middle="full")}: me
+      - ${other_parties[0].name.full(middle="full")}: them
+      - Both parents: both
+---
+id: healthcare decisions
+question: |
+  Who will make health care decisions for the children?
+subquestion: |
+  Health decisions (includes medical, dental, and psychological decisions).
+fields:
+  - Decisions will be made by: health_decisions
+    datatype: radio
+    choices:
+      - ${users[0].name.full(middle="full")}: me
+      - ${other_parties[0].name.full(middle="full")}: them
+      - Both parents: both
+---
+id: religious decisions
+question: |
+  Who will make religious decisions for the children?
+fields:
+  - Decisions will be made by: religious_decisions
+    datatype: radio
+    choices:
+      - ${users[0].name.full(middle="full")}: me
+      - ${other_parties[0].name.full(middle="full")}: them
+      - Both parents: both
+---
+id: activities decisions
+question: |
+  Who will make activities decisions for the children?
+subquestion: |
+  These include extracurricular and recreational decisions.
+fields:
+  - Decisions will be made by: activities_decisions
+    datatype: radio
+    choices:
+      - ${users[0].name.full(middle="full")}: me
+      - ${other_parties[0].name.full(middle="full")}: them
+      - Both parents: both
+---
+id: refuse childcare
+question: |
+  Right of first refusal for childcare
+subquestion: |
+  Decide whether a parent will notify the other parent of childcare needs and allow
+  them the first opportunity to provide care. Is there a right of first refusal for childcare? 
+
+  If **yes**, each parent must offer the other a first right of refusal as follows. 
+
+  * If a parent needs childcare for a period of 24 hours or more during their time with
+  the children, they must give the other parent the option to care for the children
+  before finding other childcare. 
+
+  * As soon as the need for childcare is known, the parent in need of childcare will 
+  contact the other parent. 
+
+  * The parent offered the right to care for the children must accept the offer within
+  2 hours. If they do not, the parent needing childcare may use another caregiver. 
+
+  * Transportation of the children is the same as for other parenting time.
+fields:
+  - no label: first_refusal
+    datatype: yesnoradio
+---
+id: communications
+question: |
+  RWhen can children communicate with the parent they are not with?
+subquestion: |
+  Electronic communication between the children and the other parent must not be 
+  unreasonably monitored or interrupted. Electronic communication includes telephone,
+  e-mail, text, video, etc.  
+  
+  Select one option for when the children will communicate with the parent they are not with. 
+fields: 
+  - no label: communication
+    datatype: radio
+    choices:
+      - Anytime: anytime
+      - Every day: daily 
+      - Other: other
+  - Every day between: daily_start
+    datatype: time
+    show if: 
+      variable: communication
+      is: daily
+  - Concluding by: daily_end
+    datatype: time
+    show if: 
+      variable: communication
+      is: daily
+  - Describe the other arrangement: other_description
+    datatype: area
+    show if: 
+      variable: communication
+      is: other
+---
+id: primary custody
+question: |
+  Which parent will have the most parenting time with the children?
+subquestion: |
+  Who has the most parenting time with the children? This designation will not 
+  affect parents' rights and responsibilities under the *${form_name}*.
+fields:
+  - no label: primary_parent
+    datatype: radio
+    choices:
+      - ${users[0].name.full(middle="full")}: me
+      - ${other_parties[0].name.full(middle="full")}: them
+---
+id: residential address
+question: |
+  Whose home is the children's residential address?
+subquestion: |
+  This is primarily for school enrollment purposes only.
+fields:
+  - no label: residential_address
+    datatype: radio
+    choices:
+      - ${users[0].name.full(middle="full")}: me
+      - ${other_parties[0].name.full(middle="full")}: them
+---
+id: handling conflicts
+question: |
+  Handling conflicts
+subquestion: |
+  If a parent wishes to change this Parenting Plan or feels the other parent is not 
+  following this Parenting Plan, the parents will talk and try to come to an agreement
+  on their own.  
+
+  If an agreement cannot be reached, parents will seek help from a mediator: 
+fields:
+  - Mediation is required on all issues because parents have joint decision making: mediation
+    datatype: yesnowide
+  - note: | 
+      Parents must first try to come to an agreement through mediation. 
+      
+      * Both parents must cooperate in scheduling and participating in mediation 
+
+      * Both parents must split the cost of mediation equally unless otherwise 
+      ordered by the court
+        
+      If mediation is unsuccessful, a parent must file a petition to modify this 
+      Parenting Plan or a petition to enforce this Parenting Plan with the court.  
+      Emergencies: In an emergency situation, a parent may file a petition with the court
+      to get an immediate resolution without first going through mediation. 
+    show if: mediation
+  - Mediation is not required on all issues because: no_mediation
+    datatype: yesnowide
+  - Reason for not requiring mediation: mediation_reason
+    datatype: checkboxes
+    none of the above: False
+    choices:
+      - One parent has all significant decision-making responsibility.: parent
+      - There is a history of domestic violence between the parties.: history
+      - Other reason: other
+    show if: no_mediation
+  - What are the other reasons?: other_reasons
+    datatype: area
+    show if: 
+      variable: mediation_reason['other']
+      is: True
+  - note: |
+      A parent must file a petition to change this *${form_name}* or a petition to 
+      enforce this *${form_name}* with the court
+    show if: no_mediation
+---
+
+
+
+
+
+
+
+
+
+---
+###################### DOWNLOAD SECTION #########################
+id: forms assembling
+continue button field: forms_assembling
+question: |
+  Almost done
+subquestion: |
+  After you click **Next**, it may take a few moments to finish making your forms.
+  
+  ###### You do not need to refresh your screen. Hang in there!
+  
+  [NEWLINE]
+---
+id: get docs screen
+event: get_docs_screen
+question: |
+  Download
+subquestion: |
+  Your form is ready. View and download your form below. Click **Make changes** to fix any mistakes.
+
+  This program does not deliver your *${form_name}* to other party in your case. You will need to do that yourself.
+
+  **Note:** This program does not deliver your *${form_name}* to other party in your case. You will need to do that yourself.
+  
+  Thank you for using ILAO Easy Forms!
+under: |
+  % if not user_logged_in():
+  [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} **Sign-in**](${url_of('login', next=interview_url())}) or [**create**](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
+  % endif
+
+  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+---
+
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[instructions, parenting_plan_bundle], filename="completed_parenting_plan.pdf", title="All forms", enabled=True)
+---
+objects:
+  - parenting_plan_bundle: ALDocumentBundle.using(title="Parenting Plan", filename="fa_primary.pdf", enabled=True, elements=[
+        parenting_plan,
+        additional_parenting_plan,
+        additional_children,
+      ])
+---
+objects:
+  - instructions: ALDocument.using(title="Instructions", filename="instructions.pdf", enabled=True, has_addendum=False)
+  - parenting_plan: ALDocument.using(title="Parenting Plan", filename="fa_primary.pdf", enabled=True, has_addendum=False)
+---
+attachment:
+  - name: instructions
+    variable name: instructions[i]
+    filename: instructions
+    pdf template file: instructions.pdf
+---
+attachment:
+  - name: parenting_plan
+    variable name: parenting_plan[i]
+    filename: parenting_plan
+    pdf template file: parenting_plan.pdf
+    skip undefined: True
+    editable: False
+    fields:
+      - name: user[0].name.first
+---
+objects:
+  - additional_parenting_plan: ALDocument.using(title="Additional Parenting Plan", filename="additional_parenting_plan.pdf", has_addendum=False)
+---
+code: |
+  additional_parenting_plan.enabled = False
+---
+attachment:
+  - name: additional_parenting_plan
+    variable name: additional_parenting_plan[i]
+    filename: additional_parenting_plan
+    pdf template file: additional_parenting_plan.pdf
+    editable: False
+    skip undefined: True
+    fields:
+      - name: user[0].name.first
+---
+objects:
+  - additional_children: ALDocument.using(title="Additional children", filename="additional_children.pdf", has_addendum=False)
+---
+code: |
+  additional_children.enabled = False
+---
+attachment:
+  - name: additional_children
+    variable name: additional_children[i]
+    filename: additional_children
+    editable: False
+    skip undefined: True
+    pdf template file: additional_children.pdf
+    fields:
+      - name: user[0].name.first
 ---
