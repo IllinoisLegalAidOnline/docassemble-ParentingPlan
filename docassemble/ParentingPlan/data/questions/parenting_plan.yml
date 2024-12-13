@@ -34,6 +34,8 @@ sections:
   - section_case: Case info
   - section_family: Family members
   - section_decisions: Decision making
+  - section_schedule: Parenting time
+  - section_terms: Other Parenting Plan terms
   - section_download: Download
 ---
 #################### Interview order #####################
@@ -62,17 +64,13 @@ code: |
   users[0].phone_number
   if has_employer:
     employer.name.first
-
-
   other_parties[0].name.first
   if has_other_address:
     other_parties[0].address.address
   other_parties[0].phone_number
   if has_other_employer:
     other_employer.name.first
-
   children.gather()
-
 
   nav.set_section('section_decisions')
   set_progress(40)
@@ -86,6 +84,13 @@ code: |
   residential_address
   mediation
 
+  set_progress(60)
+  nav.set_section('section_schedule')
+  parenting_time
+
+  set_progress(90)
+  nav.set_section('section_terms')
+  accept_rights
 
 
   set_progress(100)
@@ -169,13 +174,12 @@ question: |
   Whose Parenting Plan is this?
 fields:
   - Parenting plan: plan_type
-    datatype: checkboxes 
-    none of the above: False 
+    datatype: radio 
     choices: 
-      - Yours
-      - The other parent's
-      - An agreed Parenting Plan
-      - Unsure
+      - Yours: petitioner
+      - The other parent's: respondent
+      - An agreed Parenting Plan: both
+      - Unsure: unsure
 ---
 id: party label
 question: |
@@ -296,7 +300,7 @@ fields:
     required: False
   - label: |
       Do you have an email address?
-    field: users[0].has_email_address      
+    field: users[0].has_email_address
     datatype: yesnoradio
   - note: |
       This email address will appear on your court forms. Be sure to check 
@@ -305,7 +309,7 @@ fields:
     show if:
       variable: users[0].has_email_address
       is: True
-  - Email address: users[0].email    
+  - Email address: users[0].email
     datatype: email
     show if: 
       variable: users[0].has_email_address
@@ -471,6 +475,7 @@ fields:
   - "Anyone else?": children.there_is_another
     datatype: yesnoradio
 ---
+########################## DECISIONS ######################
 id: education decisions
 question: |
   Who will make education decisions for the children?
@@ -480,8 +485,8 @@ fields:
   - Decisions will be made by: eduction_decisions
     datatype: radio
     choices:
-      - ${users[0].name.full(middle="full")}: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${users[0].name.full(middle="full")}: petitioner
+      - ${other_parties[0].name.full(middle="full")}: respondent
       - Both parents: both
 ---
 id: healthcare decisions
@@ -493,8 +498,8 @@ fields:
   - Decisions will be made by: health_decisions
     datatype: radio
     choices:
-      - ${users[0].name.full(middle="full")}: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${users[0].name.full(middle="full")}: petitioner
+      - ${other_parties[0].name.full(middle="full")}: respondent
       - Both parents: both
 ---
 id: religious decisions
@@ -504,8 +509,8 @@ fields:
   - Decisions will be made by: religious_decisions
     datatype: radio
     choices:
-      - ${users[0].name.full(middle="full")}: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${users[0].name.full(middle="full")}: petitioner
+      - ${other_parties[0].name.full(middle="full")}: respondent
       - Both parents: both
 ---
 id: activities decisions
@@ -517,8 +522,8 @@ fields:
   - Decisions will be made by: activities_decisions
     datatype: radio
     choices:
-      - ${users[0].name.full(middle="full")}: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${users[0].name.full(middle="full")}: petitioner
+      - ${other_parties[0].name.full(middle="full")}: respondent
       - Both parents: both
 ---
 id: refuse childcare
@@ -547,7 +552,7 @@ fields:
 ---
 id: communications
 question: |
-  RWhen can children communicate with the parent they are not with?
+  When can children communicate with the parent they are not with?
 subquestion: |
   Electronic communication between the children and the other parent must not be 
   unreasonably monitored or interrupted. Electronic communication includes telephone,
@@ -587,8 +592,8 @@ fields:
   - no label: primary_parent
     datatype: radio
     choices:
-      - ${users[0].name.full(middle="full")}: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${users[0].name.full(middle="full")}: petitioner
+      - ${other_parties[0].name.full(middle="full")}: respondent
 ---
 id: residential address
 question: |
@@ -599,8 +604,8 @@ fields:
   - no label: residential_address
     datatype: radio
     choices:
-      - ${users[0].name.full(middle="full")}: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${users[0].name.full(middle="full")}: petitioner
+      - ${other_parties[0].name.full(middle="full")}: respondent
 ---
 id: handling conflicts
 question: |
@@ -651,10 +656,60 @@ fields:
 
 
 
+---
+########################## PARENTING TIME ######################
+id: parenting time
+question: |
+  Weekly parenting time
+subquestion: |
+  The *Parenting Plan* will include a parenting time schedule for when each parent 
+  will have the children. The form breaks down the time on an hour-by-hour basis. 
+  The forms allow for up to four different weekly schedules.
+
+  **Note:** Parenting time schedules for holidays and school breaks can be entered 
+  on other screens. The weekly schedule covers non-holidays and weeks when school 
+  is in session.
+fields:
+  - Do you want to fill in the parenting time schedule now?: parenting_time
+    datatype: radio
+    choices:
+      - Yes, I will enter the days and times for each parent on the next screens.: yes
+      - No, I will decide weekly parenting time later. I will fill out the schedule by hand or attach one to the *Parenting Plan*.: no
+---
 
 
+---
+########################## TERMS ######################
+id: rights and responsibilities
+question: |
+  Rights and responsibilities of the parents
+subquestion: |
+  This is what each parent will do when the children are with them. 
 
+  A. Make day-to-day decisions for the children when they have them, such as routine 
+  discipline, minor medical treatment, curfew, chores, and hygiene.
 
+  B. Give the other parent the name, address, and telephone number of any health 
+  care provider for the children.
+
+  C. Have access to the children's school records, childcare information, 
+  extracurricular activity schedules, and medical, dental, and mental health records
+  unless access is denied by the judge.
+
+  D. Notify the other parent as soon as possible of emergencies, health care, travel
+  plans, or other significant child-related issues
+fields:
+  - I have read and understand the above: accept
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: accept_rights
+---
 
 ---
 ###################### DOWNLOAD SECTION #########################
@@ -678,6 +733,15 @@ subquestion: |
 
   This program does not deliver your *${form_name}* to other party in your case. You will need to do that yourself.
 
+  ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
+
+  ${ al_user_bundle.download_list_html() }
+
+  [NEWLINE]
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
+
   **Note:** This program does not deliver your *${form_name}* to other party in your case. You will need to do that yourself.
   
   Thank you for using ILAO Easy Forms!
@@ -688,20 +752,268 @@ under: |
 
   ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
+#################### REVIEW SCREEN #########################
+id: review screen
+event: review_answers
+skip undefined: False
+question: |
+  Review screen
+subquestion: |
+  Edit your answers below.
+review: 
+  - note: |
+      <h4>Case info</h4>
+  - Edit: plan_type
+    button: |
+      **Parenting Plan:**
+      % if plan_type == "petitioner":
+      Yours
+      % elif plan_type == "respondent":
+      The other parent's
+      % elif plan_type == "both":
+      An agreed Parenting Plan, Unsure
+      % endif
+  - Edit: case_county
+    button: |
+      **County where this case is filed:**
+      ${ case_county }
+  - Edit: case_number
+    button: |
+      **Case number:**
+      ${ case_number }
+  - note: |
+      <h4>Family members</h4>
+  - Edit: users[0].name.first
+    button: |
+      **Your name:**
+      ${ users[0].name.full(middle="full") }
+  - Edit: hide_contact
+    button: |
+      **Do you want to hide your address?**
+      ${ word(yesno(hide_contact))}  
+  - Edit: users[0].address.address
+    button: |
+      **Your address:**
+      ${ users[0].address.on_one_line(bare=True) }
+    show if: hide_contact == False
+  - Edit: users[0].phone_number
+    button: |
+      **Your phone number:**
+      % if users[0].phone_number == "":
+      None entered
+      % else:
+      ${ phone_number_formatted(users[0].phone_number) }
+      % endif
 
+      **Your email address:**
+      % if users[0].has_email_address:
+      No email address
+      % else:
+      ${ users[0].email }
+      % endif
+  - Edit: has_employer
+    button: |
+      **Do you have income from employment?**
+      ${word(yesno(has_employer))}
+  - Edit: employer.name.first
+    button: |
+      **Employer name:**
+      ${ employer.name.full(middle="full") }
+      
+      **Employer address:**
+      ${ employer.address.on_one_line(bare=True) }
+      
+      **Employer phone:**
+      ${ phone_number_formatted(employer.phone_number) }
+    show if: has_employer
+  - Edit: other_parties[0].name.first
+    button: |
+      **Other parent's name:**
+      ${ other_parties[0].name.full(middle="full") }}
+  - Edit: has_other_address
+    button: |
+      **Have other parent's address:**
+      ${ word(yesno(has_other_address))}  
+  - Edit: other_parties[0].address.address
+    button: |
+      **Other parent's address:**
+      ${ other_parties[0].address.on_one_line(bare=True) }
+    show if: has_other_address
+  - Edit: other_parties[0].phone_number
+    button: |
+      **Other parent's phone number:**
+      % if other_parties[0].phone_number == "":
+      None entered
+      % else:
+      ${ phone_number_formatted(other_parties[0].phone_number) }
+      % endif
+
+      **Other parent's email address:**
+      % if other_parties[0].email == "":
+      No email address
+      % else:
+      ${ other_parties[0].email }
+      % endif
+  - Edit: has_other_employer
+    button: |
+      **Other parent's employment?**
+      ${word(yesno(has_other_employer))}
+  - Edit: other_employer.name.first
+    button: |
+      **Employer name:**
+      ${ other_employer.name.full(middle="full") }
+      
+      **Employer address:**
+      ${ other_employer.address.on_one_line(bare=True) }
+      
+      **Employer phone:**
+      ${ phone_number_formatted(other_employer.phone_number) }
+    show if: has_other_employer
+  - Edit: children.revisit
+    button: |
+      **Children and age**
+
+      % for child in children:
+        * ${ child.name.full() }, ${ child.age }
+      % endfor
+  - note: |
+      <h4>Decisions</h4>
+  - Edit: eduction_decisions
+    button: |
+      **Education decisions made by:**
+      % if eduction_decisions == "petitioner":
+      ${ users[0].name.full(middle="full") }}
+      % elif eduction_decisions == "respondent":
+      ${ other_parties[0].name.full(middle="full") }}
+      % elif eduction_decisions == "both":
+      Both parents
+      % endif
+  - Edit: health_decisions
+    button: |
+      **Healthcare decisions made by:**
+      % if health_decisions == "petitioner":
+      ${ users[0].name.full(middle="full") }}
+      % elif health_decisions == "respondent":
+      ${ other_parties[0].name.full(middle="full") }}
+      % elif health_decisions == "both":
+      Both parents
+      % endif
+  - Edit: religious_decisions
+    button: |
+      **Religious decisions made by:**
+      % if religious_decisions == "petitioner":
+      ${ users[0].name.full(middle="full") }}
+      % elif religious_decisions == "respondent":
+      ${ other_parties[0].name.full(middle="full") }}
+      % elif religious_decisions == "both":
+      Both parents
+      % endif
+  - Edit: activities_decisions
+    button: |
+      **Activity decisions made by:**
+      % if activities_decisions == "petitioner":
+      ${ users[0].name.full(middle="full") }}
+      % elif activities_decisions == "respondent":
+      ${ other_parties[0].name.full(middle="full") }}
+      % elif activities_decisions == "both":
+      Both parents
+      % endif
+  - Edit: first_refusal
+    button: |
+      **Right of first refusal for childcare?**
+      ${word(yesno(first_refusal))}
+  - Edit: communication
+    button: |
+      **Children communicate with other parent?**
+      % if communication == "anytime":
+      Anytime
+      % elif communication == "daily":
+      Daily
+
+      **Start**:
+      ${ format_time(daily_start, 'hh:mm a') }
+
+      **End**:
+      ${ format_time(daily_end, 'hh:mm a') }
+      % elif communication == "other":
+      Other: 
+      ${ other_description }
+      % endif
+  - Edit: primary_parent
+    button: |
+      **Primary parent of the children:**
+      % if primary_parent == "petitioner":
+      ${ users[0].name.full(middle="full") }}
+      % elif primary_parent == "respondent":
+      ${ other_parties[0].name.full(middle="full") }}
+      % endif
+  - Edit: residential_address
+    button: |
+      **Children's residential address?:**
+      % if residential_address == "petitioner":
+      ${ users[0].name.full(middle="full") }}
+      % elif residential_address == "respondent":
+      ${ other_parties[0].name.full(middle="full") }}
+      % endif
+  - Edit: mediation
+    button: |
+      **Mediation is required on all issues:**
+      ${word(yesno(mediation))}
+
+      **Mediation is not required on all issues:**
+      ${word(yesno(no_mediation))}
+
+      % if no_mediation:
+        % if mediation_reason['parent']:
+        * One parent has all significant decision-making responsibility.
+        % endif
+
+        % if mediation_reason['history']:
+        * There is a history of domestic violence between the parties.
+        % endif
+
+        % if mediation_reason['history']:
+        * Other reason: ${ other_reasons } 
+        % endif
+      % endif
+
+---
+################ REVISIT TABLES ###################
+id: children table
+table: children.table
+rows: children
+columns:
+  - Child name: |
+      row_item.name.full()
+  - Age: |
+      row_item.age
+  - Edit to change details: |
+      action_button_html(url_action(row_item.attr_name("name.first")), label="Edit", icon="pencil-alt")
+delete buttons: True
+confirm: True
+---
+id: children review screen
+continue button field: children.revisit
+question: |
+  Edit information about your children and business income
+subquestion: |
+  ${ children.table }
+
+  ${ children.add_action() }
+---
 objects:
   - al_user_bundle: ALDocumentBundle.using(elements=[instructions, parenting_plan_bundle], filename="completed_parenting_plan.pdf", title="All forms", enabled=True)
 ---
 objects:
-  - parenting_plan_bundle: ALDocumentBundle.using(title="Parenting Plan", filename="fa_primary.pdf", enabled=True, elements=[
+  - parenting_plan_bundle: ALDocumentBundle.using(title="Parenting Plan", filename="parenting_plan.pdf", enabled=True, elements=[
         parenting_plan,
-        additional_parenting_plan,
+        additional_parenting_time,
         additional_children,
       ])
 ---
 objects:
   - instructions: ALDocument.using(title="Instructions", filename="instructions.pdf", enabled=True, has_addendum=False)
-  - parenting_plan: ALDocument.using(title="Parenting Plan", filename="fa_primary.pdf", enabled=True, has_addendum=False)
+  - parenting_plan: ALDocument.using(title="Parenting Plan", filename="parenting_plan.pdf", enabled=True, has_addendum=False)
 ---
 attachment:
   - name: instructions
@@ -717,37 +1029,260 @@ attachment:
     skip undefined: True
     editable: False
     fields:
-      - name: user[0].name.first
+      - "plan_petitioner": ${ plan_type == 'petitioner' }
+      - "plan_respondent": ${ plan_type == 'respondent' }
+      - "plan_agreed": ${ plan_type == 'both' }
+      #- "plan_court": ${ plan_type == 'court' }
+      - "county_name": ${ case_county }
+      - "case_number": ${ case_number }
+      - "petitioner_name": ${ users[0].name.full(middle="full") }
+      - "respondent_name": ${ other_parties[0].name.full(middle="full") }
+      - "petitioner_address": |
+          % if not hide_contact:
+          ${ users[0].address.on_one_line(bare=True) }
+          % endif
+      - "petitioner_phone": ${ phone_number_formatted(users[0].phone_number) }
+      - "petitioner_email": |
+          % if users[0].has_email_address:
+          ${ users[0].email }
+          % endif
+      - "petitioner_employed_yes": ${ has_employer }
+      - "petitioner_employed_no": ${ not has_employer }
+      - "petitioner_employer_name": |
+          % if has_employer:
+          ${ employer.name.full(middle="full") }
+          % endif
+      - "petitioner_employer_address": |
+          % if has_employer:
+          ${ employer.address.on_one_line(bare=True) }
+          % endif
+      - "petitioner_employer_phone": |
+          % if has_employer:
+          ${ phone_number_formatted(employer.phone_number) }
+          % endif
+      - "respondent_address": |
+          % if has_other_address:
+          ${ other_parties[0].address.on_one_line(bare=True) }
+          % endif
+      - "respondent_phone": ${ phone_number_formatted(other_parties[0].phone_number) }
+      - "respondent_email": ${ other_parties[0].email }
+      - "respondent_employed_yes": ${ has_other_employer }
+      - "respondent_employed_no": ${ not has_other_employer }
+      - "respondent_employer_name": |
+          % if has_other_employer:
+          ${ other_employer.name.full(middle="full") }
+          % endif
+      - "respondent_employer_address": |
+          % if has_other_employer:
+          ${ other_employer.address.on_one_line(bare=True) }
+          % endif
+      - "respondent_employer_phone": |
+          % if has_other_employer:
+          ${ phone_number_formatted(other_employer.phone_number) }
+          % endif
+      - "child_name1": ${ children[0].name.full() }
+      - "child_age1": ${ children[0].age }
+      - "child_name2": |
+          % if children.number_gathered() >= 2:
+          ${ children[1].name.full() }
+          % endif
+      - "child_age2": |
+          % if children.number_gathered() >= 2:
+          ${ children[1].age }
+          % endif
+      - "child_name3": |
+          % if children.number_gathered() >= 3:
+          ${ children[2].name.full() }
+          % endif
+      - "child_age3": |
+          % if children.number_gathered() >= 3:
+          ${ children[2].age }
+          % endif
+      - "additional_children_yes": ${ children.number_gathered() > 3 }
+      # 6. SIGNIFICANT DECISION MAKING
+      - "6A_petitioner_only": ${ eduction_decisions == "petitioner" }
+      - "6A_respondent_only": ${ eduction_decisions == "respondent" }
+      - "6A_both_parents": ${ eduction_decisions == "both" }
+      - "6B_petitioner_only": ${ health_decisions == "petitioner" }
+      - "6B_respondent_only": ${ health_decisions == "respondent" }
+      - "6B_both_parents": ${ health_decisions == "both" }
+      - "6C_petitioner_only": ${ religious_decisions == "petitioner" }
+      - "6C_respondent_only": ${ religious_decisions == "respondent" }
+      - "6C_both_parents": ${ religious_decisions == "both" }
+      - "6D_petitioner_only": ${ activities_decisions == "petitioner" }
+      - "6D_respondent_only": ${ activities_decisions == "respondent" }
+      - "6D_both_parents": ${ activities_decisions == "both" }
+      # 10. FIRST REFUSAL FOR CHILDCARE 
+      - "refusal_no": ${ first_refusal }
+      - "refusal_yes": ${ not first_refusal }
+      # 11. COMMUNICATION 
+      - "anytime": ${ communication == "anytime" }
+      - "daily": ${ communication == "daily" }
+      - "start_time": ${ format_time(daily_start, 'h:mm') }
+      - "start_am": ${ format_time(daily_start, 'a') == 'AM' }
+      - "start_pm": ${ format_time(daily_start, 'a') == 'PM' }
+      - "end_time": ${ format_time(daily_end, 'h:mm') }
+      - "end_am": ${ format_time(daily_end, 'a') == 'AM' }
+      - "end_pm": ${ format_time(daily_end, 'a') == 'PM' }
+      - "other": ${ communication == "other" }
+      - "other_description": |
+          % if communication == "other":
+          ${ other_description }
+          % endif
+      # 13. CUSTODY & RESIDENCE FOR OTHER PURPOSES
+      - "13A_petitioner": ${ primary_parent == "petitioner" }
+      - "13A_respondent": ${ primary_parent == "respondent" }
+      - "13B_petitioner": ${ residential_address == "petitioner" }
+      - "13B_respondent": ${ residential_address == "respondent" }
+
+      # 15. HANDLING CONFLICTS (MEDIATION)
+      - "mediatiion_yes": ${ mediation } 
+      - "mediation_no": ${ no_mediation } 
+      - "parent": |
+          % if no_mediation:
+          ${ mediation_reason['parent'] } 
+          % endif
+      - "history": |
+          % if no_mediation:
+          ${ mediation_reason['history'] } 
+          % endif
+      - "other_reason": |
+          % if no_mediation:
+          ${ mediation_reason['other'] } 
+          % endif
+      - "other_reason_area": |
+          % if no_mediation:
+            % if mediation_reason['other']:
+            ${ other_reasons } 
+            % endif
+          % endif
+
+      # WEEK 1-2 SCHEDULE
+
+      # Remaining
+      # - "no_spring_break": No
+      # - "spring_break_split": No
+      # - "spring_break_even": something
+      # - "spring_break_odd": something
+      # - "spring_break_other": No
+      # - "spring_break_other_details": something
+      # - "spring_break_other_end": something
+      # - "spring_break_other_start": something
+      # - "no_summer_break": No
+      # - "summer_break_split": No
+      # - "summer_break_odd": something
+      # - "summer_break_even": something
+      # - "summer_break_other": No
+      # - "summer_break_other_details": something
+      # - "summer_break_other_end": something
+      # - "summer_break_other_start": something
+      # - "no_winter_break": No
+      # - "winter_break_even": something
+      # - "winter_break_split": No
+      # - "winter_break_odd": something
+      # - "winter_break_other": No
+      # - "winter_break_other_details": something
+      # - "winter_break_other_end": something
+      # - "winter_break_other_start": something
+      # - "additional_parenting_time": No
+      # - "transportation_petitioner": No
+      # - "transportation_respondent": No
+      # - "transportation_start": No
+      # - "transportation_end": No
+      # - "transportation_other": No
+      # - "transportation_other_details": something
+      # - "exchange_home": No
+      # - "location": something
+      # - "exchange_location": No
+      # - "location_address": something
+
+
+      
 ---
 objects:
-  - additional_parenting_plan: ALDocument.using(title="Additional Parenting Plan", filename="additional_parenting_plan.pdf", has_addendum=False)
+  - additional_parenting_time: ALDocument.using(title="Additional Parenting Time", filename="additional_parenting_time.pdf", has_addendum=False)
 ---
 code: |
-  additional_parenting_plan.enabled = False
+  additional_parenting_time.enabled = False
 ---
 attachment:
-  - name: additional_parenting_plan
-    variable name: additional_parenting_plan[i]
-    filename: additional_parenting_plan
-    pdf template file: additional_parenting_plan.pdf
-    editable: False
-    skip undefined: True
-    fields:
-      - name: user[0].name.first
+  - name: additional_parenting_time
+    variable name: additional_parenting_time[i]
+    filename: additional_parenting_time
+    pdf template file: additional_parenting_time.pdf
 ---
 objects:
   - additional_children: ALDocument.using(title="Additional children", filename="additional_children.pdf", has_addendum=False)
 ---
 code: |
-  additional_children.enabled = False
+  additional_children.enabled = children.number_gathered() > 3
 ---
 attachment:
   - name: additional_children
     variable name: additional_children[i]
     filename: additional_children
-    editable: False
-    skip undefined: True
     pdf template file: additional_children.pdf
+    skip undefined: True
+    editable: False
     fields:
-      - name: user[0].name.first
+      - "county_name": ${ case_county }
+      - "case_number": ${ case_number }
+      - "petitioner_name": ${ users[0].name.full(middle="full") }
+      - "respondent_name": ${ other_parties[0].name.full(middle="full") }
+      - "child_name4": |
+          % if children.number_gathered() >= 4:
+          ${ children[3].name.full() }
+          % endif
+      - "child_age4": |
+          % if children.number_gathered() >= 4:
+          ${ children[3].age }
+          % endif
+      - "child_name5": |
+          % if children.number_gathered() >= 5:
+          ${ children[4].name.full() }
+          % endif
+      - "child_age5": |
+          % if children.number_gathered() >= 5:
+          ${ children[4].age }
+          % endif
+      - "child_name6": |
+          % if children.number_gathered() >= 6:
+          ${ children[5].name.full() }
+          % endif
+      - "child_age6": |
+          % if children.number_gathered() >= 6:
+          ${ children[5].age }
+          % endif
+      - "child_name7": |
+          % if children.number_gathered() >= 7:
+          ${ children[6].name.full() }
+          % endif
+      - "child_age7": |
+          % if children.number_gathered() >= 7:
+          ${ children[6].age }
+          % endif
+      - "child_name8": |
+          % if children.number_gathered() >= 8:
+          ${ children[7].name.full() }
+          % endif
+      - "child_age8": |
+          % if children.number_gathered() >= 8:
+          ${ children[7].age }
+          % endif
+      - "child_name9": |
+          % if children.number_gathered() >= 9:
+          ${ children[8].name.full() }
+          % endif
+      - "child_age9": |
+          % if children.number_gathered() >= 9:
+          ${ children[8].age }
+          % endif
+      - "child_name10": |
+          % if children.number_gathered() >= 10:
+          ${ children[9].name.full() }
+          % endif
+      - "child_age10": |
+          % if children.number_gathered() >= 10:
+          ${ children[9].age }
+          % endif
 ---
