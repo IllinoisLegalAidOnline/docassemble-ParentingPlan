@@ -91,7 +91,14 @@ code: |
   set_progress(90)
   nav.set_section('section_terms')
   accept_rights
-
+  accept_move
+  accept_relocation_a
+  accept_relocation_b
+  accept_relocation_c
+  accept_relocation_d
+  accept_relocation_e
+  accept_changes_a
+  accept_changes_b
 
   set_progress(100)
   nav.set_section('section_download')
@@ -679,7 +686,7 @@ fields:
 
 
 ---
-########################## TERMS ######################
+## 5.RIGHTS & RESPONSIBILITIES OF THE PARENTS
 id: rights and responsibilities
 question: |
   Rights and responsibilities of the parents
@@ -699,7 +706,7 @@ subquestion: |
   D. Notify the other parent as soon as possible of emergencies, health care, travel
   plans, or other significant child-related issues
 fields:
-  - I have read and understand the above: accept
+  - I have read and understand the above: accept_rights
     datatype: checkboxes
     none of the above: False
     minlength: 1
@@ -708,8 +715,239 @@ fields:
     validation messages:
       minlength: |
         You cannot continue unless you have read and understand the above information.
-continue button field: accept_rights
+continue button field: terms_accept_rights
 ---
+## 3. MUST PROVIDE NOTICE OF MOVE
+id: notice of move
+question: |
+  Must provide notice of move
+subquestion: |
+  Both parents must provide each other notice if they plan to move, regardless of distance.
+
+  If a **parent plans to move**, they must give the other parent at least 60 days' 
+  notice, or notice as soon as possible of
+  
+  (1) the intended move date; and
+
+  (2) the new address unless the address is protected because of domestic violence or abuse.
+fields:
+  - I have read and understand the above: accept_move
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: terms_accept_move
+---
+## 12.A RELOCATION OF MINOR CHILDREN
+id: relocation A
+question: |
+  Relocation - when agreement required
+subquestion: |
+  Relocation is when a parent seeks to move with children for distances of over 25 or 
+  50 miles (depending on the county where they live).
+  
+  If a parent with the most parenting time or equal parenting time wishes to move 
+  with the children, they must get the **agreement of the other parent or permission 
+  from the judge** when:
+
+  * The children's primary home is in Cook, DuPage, Kane, Lake, 
+  McHenry, or Will County and the move is within  Illinois but more than 25 miles 
+  away from their current home; or 
+  
+  * The children's primary home is in any other county
+  in Illinois and the move is within Illinois but more than 50  miles away from their 
+  current home; or 
+  
+  * The move is outside of Illinois and more than 25 miles from the 
+  children's primary home.
+fields:
+  - I have read and understand the above: accept_relocation_a
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: terms_accept_relocation_a
+---
+## 12.B RELOCATION OF MINOR CHILDREN
+id: relocation B
+question: |
+  Relocation - when written notice required
+subquestion: |
+  The parent asking to move with the children must provide **written notice** to the 
+  other parent. The notice must:
+
+  * Be given at least 60 days before the move unless that is impossible. If impossible,
+  the notice must be given at the  earliest date possible; and 
+  
+  * State the date the parent plans to move; and 
+  
+  * State whether the move is permanent or for a specific time period; and 
+
+  * State the new address, if known, unless the address is protected because of 
+  domestic violence or abuse
+fields:
+  - I have read and understand the above: accept_relocation_b
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: terms_accept_relocation_b
+---
+## 12.C RELOCATION OF MINOR CHILDREN
+id: relocation C
+question: |
+  Relocation agreement
+subquestion: |
+  * **No change is needed for parenting time** - If the parents agree on the move and no 
+  change is needed to the parenting time schedule, both parties will sign the notices
+  provided about the move and file it with the court. No court appearance is needed. 
+
+  * **Changes in parenting time are needed** - If the other parent agrees with the move
+  but changes need to be made to the parenting time schedule, and the parents are in 
+  agreement about the changes to the parenting time schedule, the moving parent must: 
+
+      * Have the other parent sign the notice provided about the move;
+
+      * File the signed notice with the court; and
+
+      * File an updated *${form_name}* with the court. The court does not need to 
+      approve the move but the court must approve the changes to the *${form_name}*.
+fields:
+  - I have read and understand the above: accept_relocation_c
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: terms_accept_relocation_c
+---
+## 12.D RELOCATION OF MINOR CHILDREN
+id: relocation D
+question: |
+  Relocation partial agreement
+subquestion: |
+  * If the other parent agrees with the move, but both parents cannot agree on changes 
+  to the *${form_name}*, the moving parent must: 
+
+      * Have the other parent sign the notice provided about the move;
+
+      * File the signed notice with the court; and
+
+      * Follow the Handling Conflicts process set out below to try to reach an agreement with the
+      other parent about changes to the parenting time schedule.
+      
+  * If no agreement can be reached after completing the Handling Conflicts process, file a petition to 
+    modify the parenting time schedule with the court.
+fields:
+  - I have read and understand the above: accept_relocation_d
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: terms_accept_relocation_d
+---
+## 12.E RELOCATION OF MINOR CHILDREN
+id: relocation E
+question: |
+  Relocation no agreement
+subquestion: |
+  * If the other parent does not agree with the move, the parent relocating must: 
+        
+      * Follow the Handling Conflicts process set out below to try to reach an agreement
+      with the other parent; and
+
+      * If no agreement can be reached after completing the Handling Conflicts process, 
+      file a petition with the court asking for permission to move.
+fields:
+  - I have read and understand the above: accept_relocation_e
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: terms_accept_relocation_e
+---
+## 14.A CHANGES TO THIS PARENTING PLAN
+id: changes A
+question: |
+  Changes to the Parenting Plan when parents agree
+subquestion: |
+  If a parent wants to change this *${form_name}*, they will talk to the other parent. 
+  The parents will try to reach an agreement on their own.
+
+  If the parents agree to a change, and the change is:
+
+  * A one-time or short-term change, then they will make the change without filing an
+  agreement with the court.
+
+  * A long-term or permanent change, then they will draft and file a new *${form_name}*
+  with the court.
+fields:
+  - I have read and understand the above: accept_changes_a
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: terms_accept_changes_a
+---
+## 14.B CHANGES TO THIS PARENTING PLAN
+id: changes B
+question: |
+  Changes to the Parenting Plan when parents do not agree
+subquestion: |
+  If the parents do not agree, then they will:
+
+  * Follow the Handling Conflict section below to try to reach an agreement about 
+  changes to the *${form_name}*. If an agreement is reached, follow the steps in 15.
+
+  * If the parents still don't agree after going through the Handling Conflicts process,
+  the parent who wants the change must file a petition with the court asking for 
+  changes to this *${form_name}*.
+
+  * This *${form_name}* will be followed until the parents complete the Handling 
+  Conflicts process and agree to a new plan or a new *${form_name}* is approved by the court.
+
+fields:
+  - I have read and understand the above: accept_changes_b
+    datatype: checkboxes
+    none of the above: False
+    minlength: 1
+    choices:
+      - I have read and understand the above.
+    validation messages:
+      minlength: |
+        You cannot continue unless you have read and understand the above information.
+continue button field: terms_accept_changes_b
+---
+
+
+
 
 ---
 ###################### DOWNLOAD SECTION #########################
