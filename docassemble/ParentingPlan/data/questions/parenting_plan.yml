@@ -121,15 +121,15 @@ code: |
 
   set_progress(90)
   nav.set_section('section_terms')
-  # accept_rights
-  # accept_move
-  # accept_relocation_a
-  # accept_relocation_b
-  # accept_relocation_c
-  # accept_relocation_d
-  # accept_relocation_e
-  # accept_changes_a
-  # accept_changes_b
+  accept_rights
+  accept_move
+  accept_relocation_a
+  accept_relocation_b
+  accept_relocation_c
+  accept_relocation_d
+  accept_relocation_e
+  accept_changes_a
+  accept_changes_b
 
   set_progress(100)
   nav.set_section('section_download')
@@ -154,6 +154,13 @@ question: |
 subquestion: |
   To complete this program, you will need to know:
 
+  * How you want to split parental responsibilities? (formerly custody)
+
+  * How you want to split parenting time? (formerly visitation)
+
+  * Information about your family law court case (examples: divorce, parentage, etc.).
+
+  If this is a new case, you will need to know where you will file.
 
   It could take 30 minutes to 60 minutes to finish this program. You can log in and save your work to return to later. 
  
@@ -170,16 +177,13 @@ content: |
 id: about 
 continue button field: about_screen
 question: |
-  About the *Parenting Plan*
+  About the *${form_name}*
 subquestion: |
   The *${form_name}* is a very long form.
 
-
-
-
-  A Parenting Plan contains information about who will make decisions for the children and a schedule for when the children are with each parent.
+  A *${form_name}* contains information about who will make decisions for the children and a schedule for when the children are with each parent.
   
-  If you have completed the Parenting Plan by the time you are ready to file your case, you can file it with your petition (example: divorce, parental responsibilities, etc.).
+  If you have completed the *${form_name}* by the time you are ready to file your case, you can file it with your petition (example: divorce, parental responsibilities, etc.).
   
   If not, you must file it within 120 days of the date you file your petition.
   
@@ -399,7 +403,7 @@ fields:
   - code: |
       other_parties[0].name_fields()
 ---
-id: other parties address
+id: listed address for other party
 question: |
   Is ${other_parties[0].name.full(middle="full")}'s address listed on other court forms in this case?
 subquestion: |
@@ -408,7 +412,7 @@ fields:
   - no label: has_other_address
     datatype: yesnoradio
 ---
-id: other_parties address
+id: other parties address
 sets:
   - other_parties[0].address.address
   - other_parties[0].address.city
@@ -482,6 +486,8 @@ question: |
 subquestion:
   This minor child must be born to or adopted by you and 
   ${other_parties[0].name.full(middle="full")}.
+
+  Only children under 18 can be included in a Parenting Plan. If the child is under 1 year old, enter 0.
 fields:
   - code: |
       children[i].name_fields()
@@ -635,7 +641,7 @@ id: residential address
 question: |
   Whose home is the children's residential address?
 subquestion: |
-  This is primarily for school enrollment purposes only.
+  This is primarily for school enrollment purposes.
 fields:
   - no label: residential_address
     datatype: radio
@@ -662,14 +668,12 @@ subquestion: |
     
   If mediation is unsuccessful, a parent must file a petition to modify this 
   Parenting Plan or a petition to enforce this Parenting Plan with the court.  
-  Emergencies: In an emergency situation, a parent may file a petition with the court
-  to get an immediate resolution without first going through mediation. 
 fields:
   - no label: mediation_option
     datatype: radio
     choices: 
-      - Mediation is required on all issues because parents have joint decision making: mediation
-      - Mediation is not required on all issues because: no_mediation
+      - Mediation is required on all issues because parents have joint decision making.: mediation
+      - Mediation is not required on all issues because (explain below).: no_mediation
     
   - Reason for not requiring mediation: mediation_reason
     datatype: checkboxes
@@ -683,6 +687,7 @@ fields:
       is: no_mediation
   - What are the other reasons?: other_reasons
     datatype: area
+    maxlength: 200
     show if: 
       variable: mediation_reason['other']
       is: True
@@ -698,9 +703,12 @@ id: parenting time
 question: |
   Weekly parenting time
 subquestion: |
-  The *Parenting Plan* will include a parenting time schedule for when each parent 
+  The *${form_name}* will include a parenting time schedule for when each parent 
   will have the children. The form breaks down the time on an hour-by-hour basis. 
   The forms allow for up to four different weekly schedules.
+
+  If you want different parenting time schedules on different weeks, select **Yes**. 
+  You can enter up to four weekly parenting time schedules. 
 
   **Note:** Parenting time schedules for holidays and school breaks can be entered 
   on other screens. The weekly schedule covers non-holidays and weeks when school 
@@ -710,142 +718,183 @@ fields:
     datatype: radio
     choices:
       - Yes, I will enter the days and times for each parent on the next screens.: yes
-      - No, I will decide weekly parenting time later. I will fill out the schedule by hand or attach one to the *Parenting Plan*.: no
+      - No, I will decide weekly parenting time later. I will fill out the schedule by hand or attach one to the *${form_name}*.: no
 ---
 id: parent initials
 question: |
   Intials for each parent
 subquestion: |
-  Enter the initials for each parent. 
+  Enter the initials for each parent. These initials will be used in the *${form_name}* to identify who has parenting time.
 fields:
-  - Me: users[0].name.initials
+  - ${ users[0].name.full(middle="full") }: users[0].name.initials
     maxlength: 4
     default: ${ users[0].name.first[:1] + users[0].name.last[:1] }
-  - Them: other_parties[0].name.initials
+  - ${ other_parties[0].name.full(middle="full") }: other_parties[0].name.initials
     maxlength: 4
     default: ${ other_parties[0].name.first[:1] + other_parties[0].name.last[:1] }
 validation code: |
   if users[0].name.initials == other_parties[0].name.initials:
     validation_error("Initials must be different.")
 ---
-id: start date
+id: parenting time start date
 question: |
-  When does this schedule start?
+  When does the parenting time schedule start?
 fields:
   - Week 1 begins on: schedule_start
     datatype: ThreePartsDate
+    alMin: ${ today().format("yyyy-MM-dd") }
 ---
 id: weekly schedule
 question: |
   Do you want to enter a parenting time schedule for another week?
 subquestion: |
-  Review what you have entered so far.
+  Review what you have entered so far, up to 4 weeks total.
 
-  INSERT TABLE PART HERE LATER.
-
-  ${ week.table }
+  % for cnt, current_week in enumerate(week):
+    ${ current_week.name} | Mon | Tue | Wed | Thur | Fri | Sat | Sun
+    -----|-----|-----|-----|-----|-----|-----|-----
+    8am | ${ current_week.day[0].time_8_am } | ${ current_week.day[1].time_8_am } | ${ current_week.day[2].time_8_am } | ${ current_week.day[3].time_8_am } | ${ current_week.day[4].time_8_am } | ${ current_week.day[5].time_8_am } | ${ current_week.day[6].time_8_am } |
+    9am | ${ current_week.day[0].time_9_am } | ${ current_week.day[1].time_9_am } | ${ current_week.day[2].time_9_am } | ${ current_week.day[3].time_9_am } | ${ current_week.day[4].time_9_am } | ${ current_week.day[5].time_9_am } | ${ current_week.day[6].time_9_am } |
+    10am | ${ current_week.day[0].time_10_am } | ${ current_week.day[1].time_10_am } | ${ current_week.day[2].time_10_am } | ${ current_week.day[3].time_10_am } | ${ current_week.day[4].time_10_am } | ${ current_week.day[5].time_10_am } | ${ current_week.day[6].time_10_am } |
+    11am | ${ current_week.day[0].time_11_am } | ${ current_week.day[1].time_11_am } | ${ current_week.day[2].time_11_am } | ${ current_week.day[3].time_11_am } | ${ current_week.day[4].time_11_am } | ${ current_week.day[5].time_11_am } | ${ current_week.day[6].time_11_am } |
+    Noon | ${ current_week.day[0].time_noon } | ${ current_week.day[1].time_noon } | ${ current_week.day[2].time_noon } | ${ current_week.day[3].time_noon } | ${ current_week.day[4].time_noon } | ${ current_week.day[5].time_noon } | ${ current_week.day[6].time_noon } |
+    1pm | ${ current_week.day[0].time_1_pm } | ${ current_week.day[1].time_1_pm } | ${ current_week.day[2].time_1_pm } | ${ current_week.day[3].time_1_pm } | ${ current_week.day[4].time_1_pm } | ${ current_week.day[5].time_1_pm } | ${ current_week.day[6].time_1_pm } |    
+    2pm | ${ current_week.day[0].time_2_pm } | ${ current_week.day[1].time_2_pm } | ${ current_week.day[2].time_2_pm } | ${ current_week.day[3].time_2_pm } | ${ current_week.day[4].time_2_pm } | ${ current_week.day[5].time_2_pm } | ${ current_week.day[6].time_2_pm } |
+    3pm | ${ current_week.day[0].time_3_pm } | ${ current_week.day[1].time_3_pm } | ${ current_week.day[2].time_3_pm } | ${ current_week.day[3].time_3_pm } | ${ current_week.day[4].time_3_pm } | ${ current_week.day[5].time_3_pm } | ${ current_week.day[6].time_3_pm } |
+    4pm | ${ current_week.day[0].time_4_pm } | ${ current_week.day[1].time_4_pm } | ${ current_week.day[2].time_4_pm } | ${ current_week.day[3].time_4_pm } | ${ current_week.day[4].time_4_pm } | ${ current_week.day[5].time_4_pm } | ${ current_week.day[6].time_4_pm } |
+    5pm | ${ current_week.day[0].time_5_pm } | ${ current_week.day[1].time_5_pm } | ${ current_week.day[2].time_5_pm } | ${ current_week.day[3].time_5_pm } | ${ current_week.day[4].time_5_pm } | ${ current_week.day[5].time_5_pm } | ${ current_week.day[6].time_5_pm } |
+    6pm | ${ current_week.day[0].time_6_pm } | ${ current_week.day[1].time_6_pm } | ${ current_week.day[2].time_6_pm } | ${ current_week.day[3].time_6_pm } | ${ current_week.day[4].time_6_pm } | ${ current_week.day[5].time_6_pm } | ${ current_week.day[6].time_6_pm } |
+    7pm | ${ current_week.day[0].time_7_pm } | ${ current_week.day[1].time_7_pm } | ${ current_week.day[2].time_7_pm } | ${ current_week.day[3].time_7_pm } | ${ current_week.day[4].time_7_pm } | ${ current_week.day[5].time_7_pm } | ${ current_week.day[6].time_7_pm } |
+    8pm | ${ current_week.day[0].time_8_pm } | ${ current_week.day[1].time_8_pm } | ${ current_week.day[2].time_8_pm } | ${ current_week.day[3].time_8_pm } | ${ current_week.day[4].time_8_pm } | ${ current_week.day[5].time_8_pm } | ${ current_week.day[6].time_8_pm } |
+    9pm | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
+    Over | ${ current_week.day[0].time_over } | ${ current_week.day[1].time_over } | ${ current_week.day[2].time_over } | ${ current_week.day[3].time_over } | ${ current_week.day[4].time_over } | ${ current_week.day[5].time_over } | ${ current_week.day[6].time_over } |
+    | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
+    
+  % endfor
 fields:
-  - no label: week.there_is_another
+  - Do you need to schedule another week?: week.there_is_another
     datatype: yesnoradio
 ---
 code: |
-  #week[i].name.text = ${ "Week " (i+1) }
-  week[i].name.text = "Week"
+  week[i].name.text = "Week " + str(i + 1)
   for j, day_name in enumerate(days_of_the_week):
       week[i].day[j].name.text = day_name
       week[i].day[j].time_8_am
   week[i].complete = True 
 ---
-id: daily plan 
-generic object: DAList
+code: |
+  if week[i].day.number_gathered() == 7:
+    week[i].day.there_is_another = False
+---
+code: |
+  if week.number_gathered() == 4:
+    week.there_is_another = False
+---
+################# REMOVE ###################
+id: debug week day issues
 question:
-  What are the arrangement for ${ week[i].day[j].name }?
+  Is there another day?
+fields:
+  - no label: week[i].day.there_is_another
+    datatype: yesnoradio
+################# REMOVE ###################
+---
+id: daily plan
+question:
+  Who will have the children on ${ week[i].day[j].name }s?
 subquestion: |
+  For each time, select which parent will have the children.
+  % if i > 0:
+  
+  This is for the **Week ${ i + 1 }** schedule.
+  % endif
+  [NEWLINE] [NEWLINE]
   <button id="current_parent" class="btn btn-info">
-    <i class="fas fa-circle-xmark"></i>Select all times for "${ users[0].initials }"
+    <i class="fas fa-circle-xmark"></i> Select all times for <b>Me (${ users[0].initials })</b>
   </button>
   <button id="other_parent" class="btn btn-info">
-    <i class="fas fa-circle-xmark"></i>Select all times for "${ other_parties[0].initials }"
+    <i class="fas fa-circle-xmark"></i> Select all times for <b>${ other_parties[0].name.full(middle="full")} (${ other_parties[0].initials })</b>
   </button>
+  [NEWLINE]  [NEWLINE]
   <button id="clear_all" class="btn btn-warning">
-    <i class="fas fa-circle-xmark"></i>Clear all selections
+    <i class="fas fa-circle-xmark"></i> Clear all selections
   </button>
 fields:
   - 8 AM: week[i].day[j].time_8_am
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 9 AM: week[i].day[j].time_9_am
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 10 AM: week[i].day[j].time_10_am
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 11 AM: week[i].day[j].time_11_am
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - Noon: week[i].day[j].time_noon
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 1 PM: week[i].day[j].time_1_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 2 PM: week[i].day[j].time_2_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 3 PM: week[i].day[j].time_3_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 4 PM: week[i].day[j].time_4_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 5 PM: week[i].day[j].time_5_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 6 PM: week[i].day[j].time_6_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 7 PM: week[i].day[j].time_7_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 8 PM: week[i].day[j].time_8_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - 9 PM: week[i].day[j].time_9_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
   - Overnight: week[i].day[j].time_over
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0] } (${ other_parties[0].initials }): ${ other_parties[0].initials }
+      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
 script: |
   <script>
     $(document).on('daPageLoad', function() {
@@ -919,11 +968,11 @@ fields:
   - Select an option below: parenting_holiday
     datatype: radio
     choices: 
-      - Option 1 Holidays are put into two groups: holiday_option1
-      - Option 2 Each holiday is handled separately: holiday_option2
-      - I will decide holiday parenting time later.: other
+      - Holidays are put into two groups.: holiday_option1
+      - Each holiday is handled separately.: holiday_option2
+      - This means I will fill out the holiday parenting time later.: other
   - note: |
-      I will fill out the schedule by hand or attach one to the *Parenting Plan*.
+      Both options will remain blank to decide or attach one to the *${form_name}*.
     show if: 
       variable: parenting_holiday
       is: other
@@ -950,24 +999,35 @@ fields:
       * New Year's Eve
 
       You may add up to 5 additional holidays:
-  - Group A Other 1: other_a1
-    required: False
-  - Group A Other 2: other_a2
-    required: False
-    js show if: |
-      val("other_a1") != ''
-  - Group A Other 3: other_a3
-    required: False
-    js show if: |
-      val("other_a1") != '' && val("other_a2") != ''
-  - Group A Other 4: other_a4
-    required: False
-    js show if: |
-      val("other_a1") != '' && val("other_a2") != '' && val("other_a3") != ''
-  - Group A Other 5: other_a5
-    required: False
-    js show if: |
-      val("other_a1") != '' && val("other_a2") != '' && val("other_a3") != '' && val("other_a4") != ''
+  - Add additional Group A holiday: other_a1_yes
+    datatype: yesnowide
+  - Name of first additional holiday?: other_a1
+    maxlength: 25
+    show if: other_a1_yes
+  - Add additional Group A holiday: other_a2_yes
+    datatype: yesnowide
+    show if: other_a1_yes
+  - Name of second additional holiday?: other_a2
+    maxlength: 25
+    show if: other_a2_yes
+  - Add additional Group A holiday: other_a3_yes
+    datatype: yesnowide
+    show if: other_a2_yes
+  - Name of third additional holiday?: other_a3
+    maxlength: 25
+    show if: other_a3_yes
+  - Add additional Group A holiday: other_a4_yes
+    datatype: yesnowide
+    show if: other_a3_yes
+  - Name of fourth additional holiday: other_a4
+    maxlength: 25
+    show if: other_a4_yes
+  - Add additional Group A holiday: other_a5_yes
+    datatype: yesnowide
+    show if: other_a4_yes
+  - Name of fifth additional holiday: other_a5
+    maxlength: 25
+    show if: other_a5_yes
   - note: |
       **Group B Holidays**
       
@@ -978,33 +1038,44 @@ fields:
       * Christmas Day
 
       You may add up to 5 additional holidays:
-  - Group B Other 1: other_b1
-    required: False
-  - Group B Other 2: other_b2
-    required: False
-    js show if: |
-      val("other_b1") != ''
-  - Group B Other 3: other_b3
-    required: False
-    js show if: |
-      val("other_b1") != '' && val("other_b2") != ''
-  - Group B Other 4: other_b4
-    required: False
-    js show if: |
-      val("other_b1") != '' && val("other_b2") != '' && val("other_b3") != ''
-  - Group B Other 5: other_b5
-    required: False
-    js show if: |
-      val("other_b1") != '' && val("other_b2") != '' && val("other_b3") != '' && val("other_b4") != ''
+  - Add additional Group B holiday: other_b1_yes
+    datatype: yesnowide
+  - Name of first additional holiday?: other_b1
+    maxlength: 25
+    show if: other_b1_yes
+  - Add additional Group B holiday: other_b2_yes
+    datatype: yesnowide
+    show if: other_b1_yes
+  - Name of second additional holiday?: other_b2
+    maxlength: 25
+    show if: other_b2_yes
+  - Add additional Group B holiday: other_b3_yes
+    datatype: yesnowide
+    show if: other_b2_yes
+  - Name of third additional holiday?: other_b3
+    maxlength: 25
+    show if: other_b3_yes
+  - Add additional Group B holiday: other_b4_yes
+    datatype: yesnowide
+    show if: other_b3_yes
+  - Name of fourth additional holiday: other_b4
+    maxlength: 25
+    show if: other_b4_yes
+  - Add additional Group B holiday: other_b5_yes
+    datatype: yesnowide
+    show if: other_b4_yes
+  - Name of fifth additional holiday: other_b5
+    maxlength: 25
+    show if: other_b5_yes
 ---
 id: individual holidays
 question: |
   Individual holidays
 subquestion: |
-  You can divide holidays one-by-one. For each holiday, you can select which parent 
-  will have the children on which years. You can also choose a start and end time.
+  For each holiday, you can select which parent will have the children on which 
+  years. You can also choose a start and end time.
 
-  If the holiday is not listed, you can add up to five others.
+  If the holiday is not listed, you can add up to five others on a different screen.
 fields:
   - "Which holidays do you want to include in the parenting time schedule?": holiday_list
     datatype: checkboxes
@@ -1039,16 +1110,19 @@ fields:
   - no label: individual_holidays[i].holiday_year
     datatype: radio
     choices:
-      - I will get the children every year: me
-      - ${ other_parties[0] } will get the children every year: them
-      - I will get the children only on odd years: odd
-      - I will get the children only on even years: even
+      - I will get the children every year.: me
+      - ${ other_parties[0].name.full(middle="full") } will get the children every year.: them
+      - I will get the children only on odd years.: odd
+      - I will get the children only on even years.: even
   - Start time: individual_holidays[i].holiday_start
     datatype: time
-    default: 7:00 AM
+    default: 8:00 AM
   - End time: individual_holidays[i].holiday_end
     datatype: time
     default: 9:00 PM
+validation code: |
+  if individual_holidays[i].holiday_start >= individual_holidays[i].holiday_end:
+    validation_error("The start time must be before the end time.")
 ---
 id: other holidays
 question: |
@@ -1073,22 +1147,35 @@ fields:
   - Year: other_holidays[i].holiday_year
     datatype: radio
     choices:
-      - I will get the children every year: me
-      - ${ other_parties[0] } will get the children every year: them
-      - I will get the children only on odd years: odd
-      - I will get the children only on even years: even
+      - I will get the children every year.: me
+      - ${ other_parties[0].name.full(middle="full") } will get the children every year.: them
+      - I will get the children only on odd years.: odd
+      - I will get the children only on even years.: even
   - Start time: other_holidays[i].holiday_start
     datatype: time
-    default: 7:00 AM
+    default: 8:00 AM
   - End time: other_holidays[i].holiday_end
     datatype: time
     default: 9:00 PM
+validation code: |
+  if individual_holidays[i].holiday_start >= individual_holidays[i].holiday_end:
+    validation_error("The start time must be before the end time.")
 ---
 id: holiday gather other
 question: |
   Do you want to include another holiday on the parenting time schedule?
 subquestion: |
-  So far you have selected ${ holiday_list.true_values() } as well as additional holidays ${ other_holidays }.
+  So far you have selected the following holidays:
+
+  % for holiday in holiday_list.true_values():
+  * ${ holiday }
+  % endfor
+  
+  Additional holidays you are including:
+  
+  % for holiday in other_holidays:
+  * ${ holiday.name.text }
+  % endfor
 fields:
   - Include another holiday?: other_holidays.there_is_another
     datatype: yesnoradio
@@ -1113,19 +1200,16 @@ fields:
     choices:
       - No spring break schedule (follow the regular parenting schedule): no
       - Split up spring break even/odd years: split
+        help: |
+          One parent will have the entire spring break in even-number years and 
+          the other parent will have the entire spring break in odd-numbered years. 
+          Spring break starts at 9am the day after school dismissal and ends at 5pm the 
+          day before school starts again.
       - Other: other
-  - note: |
-      One parent will have the entire spring break in even-number years and 
-      the other parent will have the entire spring break in odd-numbered years. 
-      Spring break starts at 9am the day after school dismissal and ends at 5pm the 
-      day before school starts again.
-    show if:
-      variable: spring_break
-      is: split
   - Which parent will have the even number years?: spring_break_year
     datatype: radio
     choices:
-      - Myself: me
+      - Me: me
       - ${other_parties[0].name.full(middle="full")} only: them
     show if:
       variable: spring_break
@@ -1136,12 +1220,12 @@ fields:
       variable: spring_break
       is: other
   - Start time: spring_break_start
-    datatype: datetime
+    maxlength: 25
     show if:
       variable: spring_break
       is: other
   - End time: spring_break_end
-    datatype: datetime
+    maxlength: 25
     show if:
       variable: spring_break
       is: other
@@ -1233,26 +1317,29 @@ fields:
 ---
 id: transportation
 question: |
+  Parenting time transportation
+subquestion: |
   Select only one of these options for how the children will be transported 
   for parenting time.
 fields:
   - Transportation of children: transportation
     datatype: radio
     choices:
-      - ${ users[0] } will provide all transportation: me
-      - ${ other_parties[0] } will provide all transportation.: them
+      - I will provide all transportation.: me
+      - ${ other_parties[0].name.full(middle="full") } will provide all transportation.: them
       - Each parent will pick up the children at the start of their parenting time.: pick_up
       - Each parent will drop off the children at the end of their parenting time.: drop_off
       - Other: other
   - Other transportation plan: transportation_other
     datatype: area
+    maxlength: 200
     show if: 
       variable: transportation
       is: other
 ---
 id: exchange location
 question: |
-  Exchange of children
+  Where will children be picked up and dropped off?
 subquestion: |
   Select one of these options for where the children will be picked up and dropped off.
 fields:
@@ -1262,6 +1349,7 @@ fields:
       - Drop off and pick up of the children be at each parent's homes unless both parties in advance to a different meeting place.: homes
       - Drop off and pick up will take place at a specific location: location
   - Location name: exchange_address.location
+    maxlength: 40
     show if: 
       variable: exchange_location
       is: location
@@ -1298,7 +1386,7 @@ subquestion: |
   If the questions so far have not covered everything about the parenting time 
   schedule, you can add more details.
   
-  You can preview the *Parenting Plan* at the end of the program and add more later.
+  You can preview the *${form_name}* at the end of the program and add more later.
 fields:
   - no label: additional_time
     datatype: yesnoradio
@@ -1350,11 +1438,11 @@ subquestion: |
   Both parents must provide each other notice if they plan to move, regardless of distance.
 
   If a **parent plans to move**, they must give the other parent at least 60 days' 
-  notice, or notice as soon as possible of
+  notice, or notice as soon as possible of:
   
-  * the intended move date; and
+  * The intended move date.
 
-  * the new address unless the address is protected because of domestic violence or abuse.
+  * The new address unless the address is protected because of domestic violence or abuse.
 fields:
   - I have read and understand the above: accept_move
     datatype: checkboxes
@@ -1868,14 +1956,15 @@ review:
     button: |
       **View weekly parenting time schedule**
 
+      Use the edit button to the right to view/edit/delete weekly schedule.
   - Edit: parenting_holiday
     button: |
       **Parenting time during holidays:**
 
       % if parenting_holiday == "holiday_option1":
-      * Option 1 Holidays are put into two groups
+      * Holidays are put into two groups
       % elif parenting_holiday == "holiday_option2":
-      * Option 2 Each holiday is handled separately
+      * Each holiday is handled separately
       % elif parenting_holiday == "other":
       * I will decide holiday parenting time later.
       % endif
@@ -1884,16 +1973,16 @@ review:
     button: |
       **Other holidays:**
 
-      Group A | group B
-      ----------- | -----------
-      Thanksgiving Day | 4th of July
-      Christmas Eve | Labor Day
-      New Year's Eve | Christmas Day
-      ${ other_a1 } | ${ other_b1 }
-      ${ other_a2 } | ${ other_b2 }
-      ${ other_a3 } | ${ other_b3 }
-      ${ other_a4 } | ${ other_b4 }
-      ${ other_a5 } | ${ other_b5 }
+      Holiday | Group A | Group B
+      ---- | ----- | -----
+      Required | Thanksgiving Day | 4th of July
+      Required | Christmas Eve | Labor Day
+      Required | New Year's Eve | Christmas Day
+      Other | ${ other_a1 if showifdef('other_a1_yes') and other_a1_yes else '' } | ${ other_b1 if showifdef('other_b1_yes') and other_b1_yes else '' }
+      Other | ${ other_a2 if showifdef('other_a2_yes') and other_a2_yes else '' } | ${ other_b2 if showifdef('other_b2_yes') and other_b2_yes else '' }
+      Other | ${ other_a3 if showifdef('other_a3_yes') and other_a3_yes else '' } | ${ other_b3 if showifdef('other_b3_yes') and other_b3_yes else '' }
+      Other | ${ other_a4 if showifdef('other_a4_yes') and other_a4_yes else '' } | ${ other_b4 if showifdef('other_b4_yes') and other_b4_yes else '' }
+      Other | ${ other_a5 if showifdef('other_a5_yes') and other_a5_yes else '' }| ${ other_b5 if showifdef('other_b5_yes') and other_b5_yes else '' }
     show if: parenting_holiday == "holiday_option1"
 
   - Edit: holiday_list
@@ -2011,9 +2100,7 @@ rows: week
 columns:
   - Week: |
       row_item.name
-  - Edit week days: |
-      action_button_html(url_action(row_item.attr_name("week.day")), label="Edit", icon="pencil-alt")
-delete buttons: False
+delete buttons: True
 confirm: True
 ---
 id: week review screen
@@ -2021,9 +2108,34 @@ continue button field: week.revisit
 question: |
   Edit 
 subquestion: |
-  ${ week.table }
-
+  
+  % for cnt, current_week in enumerate(week):
+    ${ current_week.name} | Mon | Tue | Wed | Thur | Fri | Sat | Sun
+    -----|-----|-----|-----|-----|-----|-----|-----
+    8am | ${ current_week.day[0].time_8_am } | ${ current_week.day[1].time_8_am } | ${ current_week.day[2].time_8_am } | ${ current_week.day[3].time_8_am } | ${ current_week.day[4].time_8_am } | ${ current_week.day[5].time_8_am } | ${ current_week.day[6].time_8_am } |
+    9am | ${ current_week.day[0].time_9_am } | ${ current_week.day[1].time_9_am } | ${ current_week.day[2].time_9_am } | ${ current_week.day[3].time_9_am } | ${ current_week.day[4].time_9_am } | ${ current_week.day[5].time_9_am } | ${ current_week.day[6].time_9_am } |
+    10am | ${ current_week.day[0].time_10_am } | ${ current_week.day[1].time_10_am } | ${ current_week.day[2].time_10_am } | ${ current_week.day[3].time_10_am } | ${ current_week.day[4].time_10_am } | ${ current_week.day[5].time_10_am } | ${ current_week.day[6].time_10_am } |
+    11am | ${ current_week.day[0].time_11_am } | ${ current_week.day[1].time_11_am } | ${ current_week.day[2].time_11_am } | ${ current_week.day[3].time_11_am } | ${ current_week.day[4].time_11_am } | ${ current_week.day[5].time_11_am } | ${ current_week.day[6].time_11_am } |
+    Noon | ${ current_week.day[0].time_noon } | ${ current_week.day[1].time_noon } | ${ current_week.day[2].time_noon } | ${ current_week.day[3].time_noon } | ${ current_week.day[4].time_noon } | ${ current_week.day[5].time_noon } | ${ current_week.day[6].time_noon } |
+    1pm | ${ current_week.day[0].time_1_pm } | ${ current_week.day[1].time_1_pm } | ${ current_week.day[2].time_1_pm } | ${ current_week.day[3].time_1_pm } | ${ current_week.day[4].time_1_pm } | ${ current_week.day[5].time_1_pm } | ${ current_week.day[6].time_1_pm } |    
+    2pm | ${ current_week.day[0].time_2_pm } | ${ current_week.day[1].time_2_pm } | ${ current_week.day[2].time_2_pm } | ${ current_week.day[3].time_2_pm } | ${ current_week.day[4].time_2_pm } | ${ current_week.day[5].time_2_pm } | ${ current_week.day[6].time_2_pm } |
+    3pm | ${ current_week.day[0].time_3_pm } | ${ current_week.day[1].time_3_pm } | ${ current_week.day[2].time_3_pm } | ${ current_week.day[3].time_3_pm } | ${ current_week.day[4].time_3_pm } | ${ current_week.day[5].time_3_pm } | ${ current_week.day[6].time_3_pm } |
+    4pm | ${ current_week.day[0].time_4_pm } | ${ current_week.day[1].time_4_pm } | ${ current_week.day[2].time_4_pm } | ${ current_week.day[3].time_4_pm } | ${ current_week.day[4].time_4_pm } | ${ current_week.day[5].time_4_pm } | ${ current_week.day[6].time_4_pm } |
+    5pm | ${ current_week.day[0].time_5_pm } | ${ current_week.day[1].time_5_pm } | ${ current_week.day[2].time_5_pm } | ${ current_week.day[3].time_5_pm } | ${ current_week.day[4].time_5_pm } | ${ current_week.day[5].time_5_pm } | ${ current_week.day[6].time_5_pm } |
+    6pm | ${ current_week.day[0].time_6_pm } | ${ current_week.day[1].time_6_pm } | ${ current_week.day[2].time_6_pm } | ${ current_week.day[3].time_6_pm } | ${ current_week.day[4].time_6_pm } | ${ current_week.day[5].time_6_pm } | ${ current_week.day[6].time_6_pm } |
+    7pm | ${ current_week.day[0].time_7_pm } | ${ current_week.day[1].time_7_pm } | ${ current_week.day[2].time_7_pm } | ${ current_week.day[3].time_7_pm } | ${ current_week.day[4].time_7_pm } | ${ current_week.day[5].time_7_pm } | ${ current_week.day[6].time_7_pm } |
+    8pm | ${ current_week.day[0].time_8_pm } | ${ current_week.day[1].time_8_pm } | ${ current_week.day[2].time_8_pm } | ${ current_week.day[3].time_8_pm } | ${ current_week.day[4].time_8_pm } | ${ current_week.day[5].time_8_pm } | ${ current_week.day[6].time_8_pm } |
+    9pm | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
+    Over | ${ current_week.day[0].time_over } | ${ current_week.day[1].time_over } | ${ current_week.day[2].time_over } | ${ current_week.day[3].time_over } | ${ current_week.day[4].time_over } | ${ current_week.day[5].time_over } | ${ current_week.day[6].time_over } |
+    | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
+    
+  % endfor
+  % if week.number_gathered() < 4:
   ${ week.add_action() }
+  % endif
+
+  If you need to delete a week from the schedule:
+  ${ week.table }
 ---
 objects:
   - al_user_bundle: ALDocumentBundle.using(elements=[instructions, parenting_plan_bundle], filename="completed_parenting_plan.pdf", title="All forms", enabled=True)
@@ -3148,55 +3260,70 @@ attachment:
       - "groupA3": New Year's Eve
       - "groupA4": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_a1 }
+            % if showifdef('other_a1_yes') and other_a1_yes:
+            ${ other_a1 }
+            % endif
           % endif
       - "groupA5": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_a2 }
+            % if showifdef('other_a2_yes') and other_a2_yes:
+            ${ other_a2 }
+            % endif
           % endif
       - "groupA6": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_a3 }
+            % if showifdef('other_a3_yes') and other_a3_yes:
+            ${ other_a3 }
+            % endif
           % endif
       - "groupA7": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_a4 }
+            % if showifdef('other_a4_yes') and other_a4_yes:
+            ${ other_a4 }
+            % endif
           % endif
       - "groupA8": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_a5 }
+            % if showifdef('other_a5_yes') and other_a5_yes:
+            ${ other_a5 }
+            % endif
           % endif
       - "groupB1": 4th of July
       - "groupB2": Labor Day
       - "groupB3": Christmas Day
       - "groupB4": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_b1 }
+            % if showifdef('other_b1_yes') and other_b1_yes:
+            ${ other_b1 }
+            % endif
           % endif
       - "groupB5": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_b2 }
+            % if showifdef('other_b2_yes') and other_b2_yes:
+            ${ other_b2 }
+            % endif
           % endif
       - "groupB6": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_b3 }
+            % if showifdef('other_b3_yes') and other_b3_yes:
+            ${ other_b3 }
+            % endif
           % endif
       - "groupB7": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_b4 }
+            % if showifdef('other_b4_yes') and other_b4_yes:
+            ${ other_b4 }
+            % endif
           % endif
       - "groupB8": |
           % if parenting_holiday == "holiday_option1":
-          ${ other_b5 }
+            % if showifdef('other_b5_yes') and other_b5_yes:
+            ${ other_b5 }
+            % endif
           % endif
       # Individual Holidays
-
-      #  - I will get the children every year: me
-      # - ${ other_parties[0] } will get the children every year: them
-      # - I will get the children only on odd years: odd
-      # - I will get the children only on even years: even
-      # New Year’s Day
       - "holiday_odd_even": ${ parenting_holiday == "holiday_option2" }
+      # New Year’s Day
       - "holiday1_odd": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[0].name.text != "":
@@ -3319,7 +3446,7 @@ attachment:
             ${ individual_holidays[2].holiday_end.strftime('%H:%M %p') }
             % endif          
           % endif
-      # Father’s Day
+      # Father's Day
       - "holiday4_odd": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[3].name.text != "":
@@ -3698,7 +3825,7 @@ attachment:
       - "holiday13_name": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 1:
-            ${ other_holidays[1].holiday_name }
+            ${ other_holidays[1].name.text }
             % endif
           % endif
       - "holiday13_odd": |
@@ -3745,7 +3872,7 @@ attachment:
       - "holiday14_name": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 2:
-            ${ other_holidays[2].holiday_name }
+            ${ other_holidays[2].name.text }
             % endif
           % endif
       - "holiday14_odd": |
@@ -3792,7 +3919,7 @@ attachment:
       - "holiday15_name": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 3:
-            ${ other_holidays[3].holiday_name }
+            ${ other_holidays[3].name.text }
             % endif
           % endif
       - "holiday15_odd": |
@@ -3839,7 +3966,7 @@ attachment:
       - "holiday16_name": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() == 5:
-            ${ other_holidays[4].holiday_name }
+            ${ other_holidays[4].name.text }
             % endif
           % endif
       - "holiday16_odd": |
@@ -3910,11 +4037,11 @@ attachment:
           % endif
       - "spring_break_other_start": |
           % if spring_break == "other":
-          ${ format_date(spring_break_start, 'MMMM D, YYYY') }
+          ${ spring_break_start }
           % endif
       - "spring_break_other_end": |
           % if spring_break == "other":
-          ${ format_date(spring_break_end, 'MMMM D, YYYY') }
+          ${ spring_break_end }
           % endif
       - "no_summer_break": ${ summer_break == "no" }
       - "summer_break_split": ${ summer_break == "split" }
@@ -4001,7 +4128,7 @@ attachment:
       - "exchange_location": ${ exchange_location == "location" }
       - "location": |
           % if exchange_location == "location":
-          ${ exchange_address.name }
+          ${ exchange_address.location }
           % endif
       - "location_address": |
           % if exchange_location == "location":
@@ -4080,13 +4207,888 @@ objects:
   - additional_parenting_time: ALDocument.using(title="Additional Parenting Time", filename="additional_parenting_time.pdf", has_addendum=False)
 ---
 code: |
-  additional_parenting_time.enabled = False
+  additional_parenting_time.enabled = additional_time or week.number_gathered() >= 3
 ---
 attachment:
   - name: additional_parenting_time
     variable name: additional_parenting_time[i]
     filename: additional_parenting_time
     pdf template file: additional_parenting_time.pdf
+    skip undefined: True
+    editable: False
+    fields:
+      - "county_name": ${ case_county }
+      - "case_number": ${ case_number }
+      - "petitioner_name": |
+          % if party_label == 'petitioner':
+          ${ users[0].name.full(middle='full') }
+          % else:
+          ${ other_parties[0].name.full(middle='full') }
+          % endif
+      - "respondent_name": |
+          % if party_label == 'respondent':
+          ${ users[0].name.full(middle='full') }
+          % else:
+          ${ other_parties[0].name.full(middle='full') }
+          % endif
+      # Week 3 - Monday
+      - "week3_mon_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_8_am }
+          % endif
+      - "week3_mon_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_9_am }
+          % endif
+      - "week3_mon_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_10_am }
+          % endif
+      - "week3_mon_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_11_am }
+          % endif
+      - "week3_mon_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_noon }
+          % endif
+      - "week3_mon_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_1_pm }
+          % endif
+      - "week3_mon_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_2_pm }
+          % endif
+      - "week3_mon_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_3_pm }
+          % endif
+      - "week3_mon_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_4_pm }
+          % endif
+      - "week3_mon_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_5_pm }
+          % endif
+      - "week3_mon_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_6_pm }
+          % endif
+      - "week3_mon_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_7_pm }
+          % endif
+      - "week3_mon_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_8_pm }
+          % endif
+      - "week3_mon_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_9_pm }
+          % endif
+      - "week3_mon_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[0].time_over }
+          % endif
+      # Week 3 - Tuesday
+      - "week3_tues_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_8_am }
+          % endif
+      - "week3_tues_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_9_am }
+          % endif
+      - "week3_tues_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_10_am }
+          % endif
+      - "week3_tues_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_11_am }
+          % endif
+      - "week3_tues_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_noon }
+          % endif
+      - "week3_tues_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_1_pm }
+          % endif
+      - "week3_tues_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_2_pm }
+          % endif
+      - "week3_tues_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_3_pm }
+          % endif
+      - "week3_tues_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_4_pm }
+          % endif
+      - "week3_tues_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_5_pm }
+          % endif
+      - "week3_tues_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_6_pm }
+          % endif
+      - "week3_tues_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_7_pm }
+          % endif
+      - "week3_tues_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_8_pm }
+          % endif
+      - "week3_tues_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_9_pm }
+          % endif
+      - "week3_tues_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[1].time_over }
+          % endif
+      # Week 3 - Wednesday
+      - "week3_wed_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_8_am }
+          % endif
+      - "week3_wed_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_9_am }
+          % endif
+      - "week3_wed_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_10_am }
+          % endif
+      - "week3_wed_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_11_am }
+          % endif
+      - "week3_wed_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_noon }
+          % endif
+      - "week3_wed_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_1_pm }
+          % endif
+      - "week3_wed_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_2_pm }
+          % endif
+      - "week3_wed_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_3_pm }
+          % endif
+      - "week3_wed_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_4_pm }
+          % endif
+      - "week3_wed_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_5_pm }
+          % endif
+      - "week3_wed_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_6_pm }
+          % endif
+      - "week3_wed_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_7_pm }
+          % endif
+      - "week3_wed_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_8_pm }
+          % endif
+      - "week3_wed_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_9_pm }
+          % endif
+      - "week3_wed_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[2].time_over }
+          % endif
+      # Week 3 - Thursday  
+      - "week3_thurs_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_8_am }
+          % endif
+      - "week3_thurs_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_9_am }
+          % endif
+      - "week3_thurs_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_10_am }
+          % endif
+      - "week3_thurs_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_11_am }
+          % endif
+      - "week3_thurs_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_noon }
+          % endif
+      - "week3_thurs_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_1_pm }
+          % endif
+      - "week3_thurs_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_2_pm }
+          % endif
+      - "week3_thurs_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_3_pm }
+          % endif
+      - "week3_thurs_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_4_pm }
+          % endif
+      - "week3_thurs_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_5_pm }
+          % endif
+      - "week3_thurs_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_6_pm }
+          % endif
+      - "week3_thurs_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_7_pm }
+          % endif
+      - "week3_thurs_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_8_pm }
+          % endif
+      - "week3_thurs_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_9_pm }
+          % endif
+      - "week3_thurs_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[3].time_over }
+          % endif
+      # Week 3 - Friday
+      - "week3_fri_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_8_am }
+          % endif
+      - "week3_fri_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_9_am }
+          % endif
+      - "week3_fri_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_10_am }
+          % endif
+      - "week3_fri_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_11_am }
+          % endif
+      - "week3_fri_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_noon }
+          % endif
+      - "week3_fri_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_1_pm }
+          % endif
+      - "week3_fri_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_2_pm }
+          % endif
+      - "week3_fri_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_3_pm }
+          % endif
+      - "week3_fri_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_4_pm }
+          % endif
+      - "week3_fri_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_5_pm }
+          % endif
+      - "week3_fri_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_6_pm }
+          % endif
+      - "week3_fri_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_7_pm }
+          % endif
+      - "week3_fri_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_8_pm }
+          % endif
+      - "week3_fri_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_9_pm }
+          % endif
+      - "week3_fri_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[4].time_over }
+          % endif
+      # Week 3 - Saturday
+      - "week3_sat_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_8_am }
+          % endif
+      - "week3_sat_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_9_am }
+          % endif
+      - "week3_sat_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_10_am }
+          % endif
+      - "week3_sat_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_11_am }
+          % endif
+      - "week3_sat_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_noon }
+          % endif
+      - "week3_sat_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_1_pm }
+          % endif
+      - "week3_sat_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_2_pm }
+          % endif
+      - "week3_sat_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_3_pm }
+          % endif
+      - "week3_sat_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_4_pm }
+          % endif
+      - "week3_sat_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_5_pm }
+          % endif
+      - "week3_sat_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_6_pm }
+          % endif
+      - "week3_sat_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_7_pm }
+          % endif
+      - "week3_sat_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_8_pm }
+          % endif
+      - "week3_sat_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_9_pm }
+          % endif
+      - "week3_sat_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[5].time_over }
+          % endif
+      # Week 3 - Sunday
+      - "week3_sun_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_8_am }
+          % endif
+      - "week3_sun_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_9_am }
+          % endif
+      - "week3_sun_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_10_am }
+          % endif
+      - "week3_sun_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_11_am }
+          % endif
+      - "week3_sun_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_noon }
+          % endif
+      - "week3_sun_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_1_pm }
+          % endif
+      - "week3_sun_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_2_pm }
+          % endif
+      - "week3_sun_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_3_pm }
+          % endif
+      - "week3_sun_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_4_pm }
+          % endif
+      - "week3_sun_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_5_pm }
+          % endif
+      - "week3_sun_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_6_pm }
+          % endif
+      - "week3_sun_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_7_pm }
+          % endif
+      - "week3_sun_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_8_pm }
+          % endif
+      - "week3_sun_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_9_pm }
+          % endif
+      - "week3_sun_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[2].day[6].time_over }
+          % endif
+      # Week 3 - Monday
+      - "week4_mon_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_8_am }
+          % endif
+      - "week4_mon_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_9_am }
+          % endif
+      - "week4_mon_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_10_am }
+          % endif
+      - "week4_mon_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_11_am }
+          % endif
+      - "week4_mon_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_noon }
+          % endif
+      - "week4_mon_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_1_pm }
+          % endif
+      - "week4_mon_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_2_pm }
+          % endif
+      - "week4_mon_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_3_pm }
+          % endif
+      - "week4_mon_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_4_pm }
+          % endif
+      - "week4_mon_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_5_pm }
+          % endif
+      - "week4_mon_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_6_pm }
+          % endif
+      - "week4_mon_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_7_pm }
+          % endif
+      - "week4_mon_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_8_pm }
+          % endif
+      - "week4_mon_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_9_pm }
+          % endif
+      - "week4_mon_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[0].time_over }
+          % endif
+      # Week 3 - Tuesday
+      - "week4_tues_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_8_am }
+          % endif
+      - "week4_tues_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_9_am }
+          % endif
+      - "week4_tues_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_10_am }
+          % endif
+      - "week4_tues_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_11_am }
+          % endif
+      - "week4_tues_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_noon }
+          % endif
+      - "week4_tues_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_1_pm }
+          % endif
+      - "week4_tues_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_2_pm }
+          % endif
+      - "week4_tues_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_3_pm }
+          % endif
+      - "week4_tues_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_4_pm }
+          % endif
+      - "week4_tues_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_5_pm }
+          % endif
+      - "week4_tues_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_6_pm }
+          % endif
+      - "week4_tues_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_7_pm }
+          % endif
+      - "week4_tues_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_8_pm }
+          % endif
+      - "week4_tues_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_9_pm }
+          % endif
+      - "week4_tues_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[1].time_over }
+          % endif
+      # Week 3 - Wednesday
+      - "week4_wed_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_8_am }
+          % endif
+      - "week4_wed_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_9_am }
+          % endif
+      - "week4_wed_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_10_am }
+          % endif
+      - "week4_wed_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_11_am }
+          % endif
+      - "week4_wed_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_noon }
+          % endif
+      - "week4_wed_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_1_pm }
+          % endif
+      - "week4_wed_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_2_pm }
+          % endif
+      - "week4_wed_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_3_pm }
+          % endif
+      - "week4_wed_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_4_pm }
+          % endif
+      - "week4_wed_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_5_pm }
+          % endif
+      - "week4_wed_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_6_pm }
+          % endif
+      - "week4_wed_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_7_pm }
+          % endif
+      - "week4_wed_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_8_pm }
+          % endif
+      - "week4_wed_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_9_pm }
+          % endif
+      - "week4_wed_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[2].time_over }
+          % endif
+      # Week 3 - Thursday  
+      - "week4_thurs_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_8_am }
+          % endif
+      - "week4_thurs_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_9_am }
+          % endif
+      - "week4_thurs_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_10_am }
+          % endif
+      - "week4_thurs_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_11_am }
+          % endif
+      - "week4_thurs_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_noon }
+          % endif
+      - "week4_thurs_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_1_pm }
+          % endif
+      - "week4_thurs_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_2_pm }
+          % endif
+      - "week4_thurs_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_3_pm }
+          % endif
+      - "week4_thurs_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_4_pm }
+          % endif
+      - "week4_thurs_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_5_pm }
+          % endif
+      - "week4_thurs_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_6_pm }
+          % endif
+      - "week4_thurs_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_7_pm }
+          % endif
+      - "week4_thurs_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_8_pm }
+          % endif
+      - "week4_thurs_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_9_pm }
+          % endif
+      - "week4_thurs_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[3].time_over }
+          % endif
+      # Week 3 - Friday
+      - "week4_fri_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_8_am }
+          % endif
+      - "week4_fri_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_9_am }
+          % endif
+      - "week4_fri_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_10_am }
+          % endif
+      - "week4_fri_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_11_am }
+          % endif
+      - "week4_fri_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_noon }
+          % endif
+      - "week4_fri_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_1_pm }
+          % endif
+      - "week4_fri_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_2_pm }
+          % endif
+      - "week4_fri_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_3_pm }
+          % endif
+      - "week4_fri_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_4_pm }
+          % endif
+      - "week4_fri_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_5_pm }
+          % endif
+      - "week4_fri_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_6_pm }
+          % endif
+      - "week4_fri_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_7_pm }
+          % endif
+      - "week4_fri_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_8_pm }
+          % endif
+      - "week4_fri_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_9_pm }
+          % endif
+      - "week4_fri_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[4].time_over }
+          % endif
+      # Week 3 - Saturday
+      - "week4_sat_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_8_am }
+          % endif
+      - "week4_sat_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_9_am }
+          % endif
+      - "week4_sat_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_10_am }
+          % endif
+      - "week4_sat_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_11_am }
+          % endif
+      - "week4_sat_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_noon }
+          % endif
+      - "week4_sat_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_1_pm }
+          % endif
+      - "week4_sat_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_2_pm }
+          % endif
+      - "week4_sat_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_3_pm }
+          % endif
+      - "week4_sat_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_4_pm }
+          % endif
+      - "week4_sat_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_5_pm }
+          % endif
+      - "week4_sat_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_6_pm }
+          % endif
+      - "week4_sat_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_7_pm }
+          % endif
+      - "week4_sat_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_8_pm }
+          % endif
+      - "week4_sat_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_9_pm }
+          % endif
+      - "week4_sat_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[5].time_over }
+          % endif
+      # Week 3 - Sunday
+      - "week4_sun_8am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_8_am }
+          % endif
+      - "week4_sun_9am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_9_am }
+          % endif
+      - "week4_sun_10am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_10_am }
+          % endif
+      - "week4_sun_11am": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_11_am }
+          % endif
+      - "week4_sun_noon": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_noon }
+          % endif
+      - "week4_sun_1pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_1_pm }
+          % endif
+      - "week4_sun_2pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_2_pm }
+          % endif
+      - "week4_sun_3pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_3_pm }
+          % endif
+      - "week4_sun_4pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_4_pm }
+          % endif
+      - "week4_sun_5pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_5_pm }
+          % endif
+      - "week4_sun_6pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_6_pm }
+          % endif
+      - "week4_sun_7pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_7_pm }
+          % endif
+      - "week4_sun_8pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_8_pm }
+          % endif
+      - "week4_sun_9pm": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_9_pm }
+          % endif
+      - "week4_sun_over": |
+          % if week.number_gathered() >= 1:
+            ${ week[3].day[6].time_over }
+          % endif
+      - "addtional_information": |
+          % if additional_time:
+          ${ additional_time_details }
+          % endif
 ---
 objects:
   - additional_children: ALDocument.using(title="Additional children", filename="additional_children.pdf", has_addendum=False)
