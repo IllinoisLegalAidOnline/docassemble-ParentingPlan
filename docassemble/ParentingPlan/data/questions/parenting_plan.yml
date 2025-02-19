@@ -772,7 +772,7 @@ subquestion: |
     9pm<BR>Over | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
     ${ current_week.name} | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
 
-    <BR><BR>
+    
   % endfor
 fields:
   - Do you need to schedule another week?: week.there_is_another
@@ -976,10 +976,10 @@ question: |
 subquestion: |
   % if party_label == 'petitioner':
   In even-numbered years, you will have the minor children on Group A holidays and they
-will have the minor children on Group B holidays.
+  will have the minor children on Group B holidays.
   % else:
   In even-numbered years, they will have the minor children on Group A holidays and you
-will have the minor children on Group B holidays.
+  will have the minor children on Group B holidays.
   % endif
 
   % if party_label == 'petitioner':
@@ -4038,17 +4038,17 @@ attachment:
       - "spring_break_even": |
           % if spring_break == "split":
             % if spring_break_year == "me":
-              ${ users[0].initials }
+          ${ users[0].initials }
             % else:
-              ${ other_parties[0].initials }
+          ${ other_parties[0].initials }
             % endif
           % endif
       - "spring_break_odd": |
           % if spring_break == "split":
             % if spring_break_year == "me":
-              ${ other_parties[0].initials }
+          ${ other_parties[0].initials }
             % else:
-              ${ users[0].initials }
+          ${ users[0].initials }
             % endif
           % endif
       - "spring_break_other": ${ spring_break == "other" }
@@ -4069,17 +4069,17 @@ attachment:
       - "summer_break_even": |
           % if summer_break == "split":
             % if summer_break_year == "me":
-            ${ users[0].initials }
+          ${ users[0].initials }
             % else:
-            ${ other_parties[0].initials }
+          ${ other_parties[0].initials }
             % endif
           % endif
       - "summer_break_odd": |
           % if summer_break == "split":
             % if summer_break_year == "me":
-            ${ other_parties[0].initials }
+          ${ other_parties[0].initials }
             % else:
-            ${ users[0].initials }
+          ${ users[0].initials }
             % endif
           % endif
       - "summer_break_other": ${ summer_break == "other" }
@@ -4100,17 +4100,17 @@ attachment:
       - "winter_break_even": |
           % if winter_break == "split":
             % if winter_break_year == "me":
-              ${ users[0].initials }
+          ${ users[0].initials }
             % else:
-              ${ other_parties[0].initials }
+          ${ other_parties[0].initials }
             % endif
           % endif
       - "winter_break_odd": |
           % if winter_break == "split":
             % if winter_break_year == "me":
-              ${ other_parties[0].initials }
+          ${ other_parties[0].initials }
             % else:
-              ${ users[0].initials }
+          ${ users[0].initials }
             % endif
           % endif
       - "winter_break_other": ${ winter_break == "other" }
