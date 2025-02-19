@@ -486,8 +486,6 @@ question: |
 subquestion:
   This minor child must be born to or adopted by you and 
   ${other_parties[0].name.full(middle="full")}.
-
-  Only children under 18 can be included in a Parenting Plan. If the child is under 1 year old, enter 0.
 fields:
   - code: |
       children[i].name_fields()
@@ -497,6 +495,8 @@ sets:
   - children[i].age
 question: |
   What is ${children[i].name.full(middle="full")} age?
+subquestion: |
+  Only children under 18 can be included in a Parenting Plan. If the child is under 1 year old, enter 0.
 fields:
   - Age: children[i].age
     datatype: integer
@@ -623,6 +623,9 @@ fields:
     show if: 
       variable: communication
       is: other
+validation code: |
+  if daily_start > daily_end:
+    validation_error("The start time must be before the end time.")
 ---
 id: primary custody
 question: |
@@ -766,10 +769,10 @@ subquestion: |
     6pm | ${ current_week.day[0].time_6_pm } | ${ current_week.day[1].time_6_pm } | ${ current_week.day[2].time_6_pm } | ${ current_week.day[3].time_6_pm } | ${ current_week.day[4].time_6_pm } | ${ current_week.day[5].time_6_pm } | ${ current_week.day[6].time_6_pm } |
     7pm | ${ current_week.day[0].time_7_pm } | ${ current_week.day[1].time_7_pm } | ${ current_week.day[2].time_7_pm } | ${ current_week.day[3].time_7_pm } | ${ current_week.day[4].time_7_pm } | ${ current_week.day[5].time_7_pm } | ${ current_week.day[6].time_7_pm } |
     8pm | ${ current_week.day[0].time_8_pm } | ${ current_week.day[1].time_8_pm } | ${ current_week.day[2].time_8_pm } | ${ current_week.day[3].time_8_pm } | ${ current_week.day[4].time_8_pm } | ${ current_week.day[5].time_8_pm } | ${ current_week.day[6].time_8_pm } |
-    9pm | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
-    Over | ${ current_week.day[0].time_over } | ${ current_week.day[1].time_over } | ${ current_week.day[2].time_over } | ${ current_week.day[3].time_over } | ${ current_week.day[4].time_over } | ${ current_week.day[5].time_over } | ${ current_week.day[6].time_over } |
-    | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
-    
+    9pm<BR>Over | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
+    ${ current_week.name} | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
+
+    <BR><BR>
   % endfor
 fields:
   - Do you need to schedule another week?: week.there_is_another
@@ -810,14 +813,14 @@ subquestion: |
   % endif
   [NEWLINE] [NEWLINE]
   <button id="current_parent" class="btn btn-info">
-    <i class="fas fa-circle-xmark"></i> Select all times for <b>Me (${ users[0].initials })</b>
+    <i class="fas fa-check-square"></i> Select all times for <b>Me (${ users[0].initials })</b>
   </button>
   <button id="other_parent" class="btn btn-info">
-    <i class="fas fa-circle-xmark"></i> Select all times for <b>${ other_parties[0].name.full(middle="full")} (${ other_parties[0].initials })</b>
+    <i class="fas fa-check-square"></i> Select all times for <b>${ other_parties[0].name.full(middle="full")} (${ other_parties[0].initials })</b>
   </button>
   [NEWLINE]  [NEWLINE]
   <button id="clear_all" class="btn btn-warning">
-    <i class="fas fa-circle-xmark"></i> Clear all selections
+    <i class="fas fa-eraser"></i> Clear all selections
   </button>
 fields:
   - 8 AM: week[i].day[j].time_8_am
@@ -885,12 +888,7 @@ fields:
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
       - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
-  - 9 PM: week[i].day[j].time_9_pm
-    datatype: radio
-    choices: 
-      - Me (${ users[0].initials }): ${ users[0].initials }
-      - ${ other_parties[0].name.full(middle="full") } (${ other_parties[0].initials }): ${ other_parties[0].initials }
-  - Overnight: week[i].day[j].time_over
+  - 9 PM - Overnight: week[i].day[j].time_9_pm
     datatype: radio
     choices: 
       - Me (${ users[0].initials }): ${ users[0].initials }
@@ -899,6 +897,7 @@ script: |
   <script>
     $(document).on('daPageLoad', function() {
       function handleButtonClick(buttonId, initials) {
+        var next_btn = document.getElementById('da-continue-button');
         var button = document.getElementById(buttonId);
         if (button) {
           button.addEventListener('click', function(event) {
@@ -920,20 +919,13 @@ script: |
                 option.click();
               }
             });
+            next_btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            next_btn.focus();
           });
         }
       }
       function handleClearButtonClick(buttonId) {
-        var button = document.getElementById(buttonId);
-        if (button) {
-          button.addEventListener('click', function(event) {
-            event.preventDefault();
-            var radios = document.querySelectorAll('input[type="radio"]');
-            radios.forEach(function(radio) {
-              radio.checked = false;
-            });
-          });
-        }
+        document.getElementById('daform').reset();
       }
       // Add event listeners to buttons
       handleButtonClick('current_parent', "${ users[0].initials }");
@@ -972,7 +964,8 @@ fields:
       - Each holiday is handled separately.: holiday_option2
       - This means I will fill out the holiday parenting time later.: other
   - note: |
-      Both options will remain blank to decide or attach one to the *${form_name}*.
+      I will decide holiday parenting time later. This means I will fill out the schedule
+      by hand or attach one to the *${form_name}*.
     show if: 
       variable: parenting_holiday
       is: other
@@ -981,13 +974,23 @@ id: holiday by groups
 question: |
   Holidays by group
 subquestion: |
+  % if party_label == 'petitioner':
   In even-numbered years, you will have the minor children on Group A holidays and they
-  will have the minor children on Group B holidays.
+will have the minor children on Group B holidays.
+  % else:
+  In even-numbered years, they will have the minor children on Group A holidays and you
+will have the minor children on Group B holidays.
+  % endif
 
+  % if party_label == 'petitioner':
   In odd-numbered years, you will have the minor children on Group B holidays and they
   will have the minor children on Group A holidays.
+  % else:
+  In odd-numbered years, they will have the minor children on Group B holidays and you
+  will have the minor children on Group A holidays.
+  % endif
 
-  You can add up to five other holidays for each group below.
+  **Note:** You can add up to five other holidays for each group below.
 fields:
   - note: |
       **Group A Holidays**
@@ -1001,31 +1004,31 @@ fields:
       You may add up to 5 additional holidays:
   - Add additional Group A holiday: other_a1_yes
     datatype: yesnowide
-  - Name of first additional holiday?: other_a1
+  - Name of the first additional holiday?: other_a1
     maxlength: 25
     show if: other_a1_yes
   - Add additional Group A holiday: other_a2_yes
     datatype: yesnowide
     show if: other_a1_yes
-  - Name of second additional holiday?: other_a2
+  - Name of the second additional holiday?: other_a2
     maxlength: 25
     show if: other_a2_yes
   - Add additional Group A holiday: other_a3_yes
     datatype: yesnowide
     show if: other_a2_yes
-  - Name of third additional holiday?: other_a3
+  - Name of the third additional holiday?: other_a3
     maxlength: 25
     show if: other_a3_yes
   - Add additional Group A holiday: other_a4_yes
     datatype: yesnowide
     show if: other_a3_yes
-  - Name of fourth additional holiday: other_a4
+  - Name of the fourth additional holiday: other_a4
     maxlength: 25
     show if: other_a4_yes
   - Add additional Group A holiday: other_a5_yes
     datatype: yesnowide
     show if: other_a4_yes
-  - Name of fifth additional holiday: other_a5
+  - Name of the fifth additional holiday: other_a5
     maxlength: 25
     show if: other_a5_yes
   - note: |
@@ -1040,31 +1043,31 @@ fields:
       You may add up to 5 additional holidays:
   - Add additional Group B holiday: other_b1_yes
     datatype: yesnowide
-  - Name of first additional holiday?: other_b1
+  - Name of the first additional holiday?: other_b1
     maxlength: 25
     show if: other_b1_yes
   - Add additional Group B holiday: other_b2_yes
     datatype: yesnowide
     show if: other_b1_yes
-  - Name of second additional holiday?: other_b2
+  - Name of the second additional holiday?: other_b2
     maxlength: 25
     show if: other_b2_yes
   - Add additional Group B holiday: other_b3_yes
     datatype: yesnowide
     show if: other_b2_yes
-  - Name of third additional holiday?: other_b3
+  - Name of the third additional holiday?: other_b3
     maxlength: 25
     show if: other_b3_yes
   - Add additional Group B holiday: other_b4_yes
     datatype: yesnowide
     show if: other_b3_yes
-  - Name of fourth additional holiday: other_b4
+  - Name of the fourth additional holiday: other_b4
     maxlength: 25
     show if: other_b4_yes
   - Add additional Group B holiday: other_b5_yes
     datatype: yesnowide
     show if: other_b4_yes
-  - Name of fifth additional holiday: other_b5
+  - Name of the fifth additional holiday: other_b5
     maxlength: 25
     show if: other_b5_yes
 ---
@@ -1158,7 +1161,7 @@ fields:
     datatype: time
     default: 9:00 PM
 validation code: |
-  if individual_holidays[i].holiday_start >= individual_holidays[i].holiday_end:
+  if other_holidays[i].holiday_start >= other_holidays[i].holiday_end:
     validation_error("The start time must be before the end time.")
 ---
 id: holiday gather other
@@ -1210,7 +1213,7 @@ fields:
     datatype: radio
     choices:
       - Me: me
-      - ${other_parties[0].name.full(middle="full")} only: them
+      - ${other_parties[0].name.full(middle="full")}: them
     show if:
       variable: spring_break
       is: split
@@ -1219,13 +1222,13 @@ fields:
     show if:
       variable: spring_break
       is: other
-  - Start time: spring_break_start
-    maxlength: 25
+  - Start day/time: spring_break_start
+    maxlength: 30
     show if:
       variable: spring_break
       is: other
-  - End time: spring_break_end
-    maxlength: 25
+  - End day/time: spring_break_end
+    maxlength: 30
     show if:
       variable: spring_break
       is: other
@@ -1252,8 +1255,8 @@ fields:
   - Which parent will have the even number years?: summer_break_year
     datatype: radio
     choices:
-      - Myself: me
-      - ${other_parties[0].name.full(middle="full")} only: them
+      - Me: me
+      - ${other_parties[0].name.full(middle="full")}: them
     show if:
       variable: summer_break
       is: split
@@ -1262,13 +1265,13 @@ fields:
     show if:
       variable: summer_break
       is: other
-  - Start time: summer_break_start
-    datatype: datetime
+  - Start day/time: summer_break_start
+    maxlength: 30
     show if:
       variable: summer_break
       is: other
-  - End time: summer_break_end
-    datatype: datetime
+  - End day/time: summer_break_end
+    maxlength: 30
     show if:
       variable: summer_break
       is: other
@@ -1294,8 +1297,8 @@ fields:
   - Which parent will have the even number years?: winter_break_year
     datatype: radio
     choices:
-      - Myself: me
-      - ${other_parties[0].name.full(middle="full")} only: them
+      - Me: me
+      - ${other_parties[0].name.full(middle="full")}: them
     show if:
       variable: winter_break
       is: split
@@ -1304,13 +1307,13 @@ fields:
     show if:
       variable: winter_break
       is: other
-  - Start time: winter_break_start
-    datatype: datetime
+  - Start day/time: winter_break_start
+    maxlength: 30
     show if:
       variable: winter_break
       is: other
-  - End time: winter_break_end
-    datatype: datetime
+  - End day/time: winter_break_end
+    maxlength: 30
     show if:
       variable: winter_break
       is: other
@@ -1701,7 +1704,18 @@ under: |
   [${fa_icon("sign-in-alt", color="#0079d0", size="sm")} **Sign-in**](${url_of('login', next=interview_url())}) or [**create**](${url_of('register', next=interview_url())}) an ILAO Easy Form account to save your progress (optional).
   % endif
 
-  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+---
+generic object: ALDocumentBundle
+template: x.send_email_template
+subject: |
+  Parenting plan forms
+content: |
+  Your forms are attached.
+  
+  Thanks for using ILAO Easy Forms!
+  
+  [**Illinois Legal Aid Online**](https://www.illinoislegalaid.org)
 ---
 #################### REVIEW SCREEN #########################
 id: review screen
@@ -1947,16 +1961,21 @@ review:
       **Initials for each parent:**
 
       % if parenting_time:
-      * ${ users[0].initials } will be ${ users[0].name } 
+      * ${ users[0].initials } will be ${ users[0].name.full(middle="full") }
 
-      * ${ other_parties[0].initials } will be ${ other_parties[0].name }
+      * ${ other_parties[0].initials } will be ${ other_parties[0].name.full(middle="full") }
       % endif
 
+  - Edit: schedule_start
+    button: |
+      **Schedule will start on:** ${ format_date(schedule_start, "MMMM d, YYYY") }
+    show if: parenting_time
   - Edit: week.revisit
     button: |
-      **View weekly parenting time schedule**
+      **View weekly parenting time schedule:**
 
       Use the edit button to the right to view/edit/delete weekly schedule.
+    show if: parenting_time
   - Edit: parenting_holiday
     button: |
       **Parenting time during holidays:**
@@ -1971,18 +1990,24 @@ review:
 
   - Edit: other_a1
     button: |
-      **Other holidays:**
+      **Holidays by group are as follows:**
 
       Holiday | Group A | Group B
       ---- | ----- | -----
       Required | Thanksgiving Day | 4th of July
       Required | Christmas Eve | Labor Day
       Required | New Year's Eve | Christmas Day
-      Other | ${ other_a1 if showifdef('other_a1_yes') and other_a1_yes else '' } | ${ other_b1 if showifdef('other_b1_yes') and other_b1_yes else '' }
-      Other | ${ other_a2 if showifdef('other_a2_yes') and other_a2_yes else '' } | ${ other_b2 if showifdef('other_b2_yes') and other_b2_yes else '' }
-      Other | ${ other_a3 if showifdef('other_a3_yes') and other_a3_yes else '' } | ${ other_b3 if showifdef('other_b3_yes') and other_b3_yes else '' }
-      Other | ${ other_a4 if showifdef('other_a4_yes') and other_a4_yes else '' } | ${ other_b4 if showifdef('other_b4_yes') and other_b4_yes else '' }
-      Other | ${ other_a5 if showifdef('other_a5_yes') and other_a5_yes else '' }| ${ other_b5 if showifdef('other_b5_yes') and other_b5_yes else '' }
+      % if showifdef('other_a1_yes') and other_a1_yes or showifdef('other_b1_yes') and other_b1_yes:
+      First Additonal | ${ other_a1 if showifdef('other_a1_yes') and other_a1_yes else '' } | ${ other_b1 if showifdef('other_b1_yes') and other_b1_yes else '' }
+      % elif showifdef('other_a2_yes') and other_a2_yes or showifdef('other_b2_yes') and other_b2_yes:
+      Second Additonal | ${ other_a2 if showifdef('other_a2_yes') and other_a2_yes else '' } | ${ other_b2 if showifdef('other_b2_yes') and other_b2_yes else '' }
+      % elif showifdef('other_a3_yes') and other_a3_yes or showifdef('other_b3_yes') and other_b3_yes:
+      Third Additonal | ${ other_a3 if showifdef('other_a3_yes') and other_a3_yes else '' } | ${ other_b3 if showifdef('other_b3_yes') and other_b3_yes else '' }
+      % elif showifdef('other_a4_yes') and other_a4_yes or showifdef('other_b4_yes') and other_b4_yes:
+      Fourth Additonal | ${ other_a4 if showifdef('other_a4_yes') and other_a4_yes else '' } | ${ other_b4 if showifdef('other_b4_yes') and other_b4_yes else '' }
+      % elif showifdef('other_a5_yes') and other_a5_yes or showifdef('other_b5_yes') and other_b5_yes:
+      Fifth Additonal | ${ other_a5 if showifdef('other_a5_yes') and other_a5_yes else '' }| ${ other_b5 if showifdef('other_b5_yes') and other_b5_yes else '' }
+      % endif
     show if: parenting_holiday == "holiday_option1"
 
   - Edit: holiday_list
@@ -2002,8 +2027,24 @@ review:
       * No spring break schedule
       % elif spring_break == "split":
       * Split up spring break even/odd years
+
+        % if spring_break_year == "me":
+          ${ users[0].name.full(middle="full") } will have the even-numbered years.
+        % else:
+          ${ other_parties[0].name.full(middle="full") } will have the even-numbered years.
+        % endif
+        
+        % if spring_break_year == "me":
+          ${ users[0].name.full(middle="full") } will have the odd-numbered years.
+        % else:
+          ${ other_parties[0].name.full(middle="full") } will have the odd-numbered years.
+        % endif
       % elif spring_break == "other":
       * Other: ${ spring_break_other }
+
+      Start day/time: ${ spring_break_start }
+
+      Start day/time: ${ spring_break_end }
       % endif
 
   - Edit: summer_break
@@ -2014,8 +2055,25 @@ review:
       * No summer break schedule
       % elif summer_break == "split":
       * Each parent will have 2 non-consecutive weeks in the summer
+
+        % if summer_break_year == "me":
+          ${ users[0].name.full(middle="full") } will have first choice of dates in even-numbered years.
+        % else:
+          ${ other_parties[0].name.full(middle="full") } will have first choice of dates in even-numbered years.
+        % endif
+        
+        % if summer_break_year == "me":
+          ${ users[0].name.full(middle="full") } will have first choice of dates in odd-numbered years.
+        % else:
+          ${ other_parties[0].name.full(middle="full") } will have first choice of dates in odd-numbered years.
+        % endif
+
       % elif summer_break == "other":
       * Other: ${ summer_break_other }
+
+      Start day/time: ${ summer_break_start }
+
+      Start day/time: ${ summer_break_end }
       % endif
 
   - Edit: winter_break
@@ -2023,11 +2081,28 @@ review:
       **What parenting time schedule do you want for school winter break?**
 
       % if winter_break == "no":
-      * No spring break schedule
+      * No winter break schedule
       % elif winter_break == "split":
-      * Split up spring break even/odd years
+      * Split up winter break even/odd years
+
+        % if winter_break_year == "me":
+          ${ users[0].name.full(middle="full") } will have first half of winter break in even-numbered years.
+        % else:
+          ${ other_parties[0].name.full(middle="full") } will have first half of winter break in even-numbered years.
+        % endif
+        
+        % if winter_break_year == "me":
+          ${ users[0].name.full(middle="full") } will have first half of winter break in odd-numbered years.
+        % else:
+          ${ other_parties[0].name.full(middle="full") } will have first half of winter break in odd-numbered years.
+        % endif
+
       % elif winter_break == "other":
       * Other: ${ winter_break_other }
+
+      Start day/time: ${ winter_break_start }
+
+      Start day/time: ${ winter_break_end }
       % endif
 
   - Edit: transportation
@@ -2055,6 +2130,8 @@ review:
       * Drop off and pick up of the children be at each parent's homes unless both parties in advance to a different meeting place.
       % elif exchange_location == "location":
       * Drop off and pick up will take place at a specific location:
+      
+      ${ exchange_address.location }
       
       ${ exchange_address.address.on_one_line(bare=True) }
       % endif
@@ -2106,7 +2183,7 @@ confirm: True
 id: week review screen
 continue button field: week.revisit
 question: |
-  Edit 
+  Reviewing weekly parenting time
 subquestion: |
   
   % for cnt, current_week in enumerate(week):
@@ -2125,9 +2202,9 @@ subquestion: |
     6pm | ${ current_week.day[0].time_6_pm } | ${ current_week.day[1].time_6_pm } | ${ current_week.day[2].time_6_pm } | ${ current_week.day[3].time_6_pm } | ${ current_week.day[4].time_6_pm } | ${ current_week.day[5].time_6_pm } | ${ current_week.day[6].time_6_pm } |
     7pm | ${ current_week.day[0].time_7_pm } | ${ current_week.day[1].time_7_pm } | ${ current_week.day[2].time_7_pm } | ${ current_week.day[3].time_7_pm } | ${ current_week.day[4].time_7_pm } | ${ current_week.day[5].time_7_pm } | ${ current_week.day[6].time_7_pm } |
     8pm | ${ current_week.day[0].time_8_pm } | ${ current_week.day[1].time_8_pm } | ${ current_week.day[2].time_8_pm } | ${ current_week.day[3].time_8_pm } | ${ current_week.day[4].time_8_pm } | ${ current_week.day[5].time_8_pm } | ${ current_week.day[6].time_8_pm } |
-    9pm | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
-    Over | ${ current_week.day[0].time_over } | ${ current_week.day[1].time_over } | ${ current_week.day[2].time_over } | ${ current_week.day[3].time_over } | ${ current_week.day[4].time_over } | ${ current_week.day[5].time_over } | ${ current_week.day[6].time_over } |
-    | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
+    9pm<BR>Over | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
+    ${ current_week.name} | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
+    
     
   % endfor
   % if week.number_gathered() < 4:
@@ -2397,7 +2474,7 @@ attachment:
           % endif
       - "week_1_date": |
           % if week.number_gathered() > 0:
-            ${ format_date(schedule_start, "MM/dd/YYYY") }
+            ${ format_date(schedule_start, "MMMM d, YYYY") }
           % endif
       # Week 1 - Monday
       - "week1_mon_8am": |
@@ -2456,10 +2533,6 @@ attachment:
           % if week.number_gathered() > 0:
             ${ week[0].day[0].time_9_pm }
           % endif
-      - "week1_mon_over": |
-          % if week.number_gathered() > 0:
-            ${ week[0].day[0].time_over }
-          % endif
       # Week 1 - Tuesday
       - "week1_tues_8am": |
           % if week.number_gathered() > 0:
@@ -2516,10 +2589,6 @@ attachment:
       - "week1_tues_9pm": |
           % if week.number_gathered() > 0:
             ${ week[0].day[1].time_9_pm }
-          % endif
-      - "week1_tues_over": |
-          % if week.number_gathered() > 0:
-            ${ week[0].day[1].time_over }
           % endif
       # Week 1 - Wednesday
       - "week1_wed_8am": |
@@ -2578,10 +2647,6 @@ attachment:
           % if week.number_gathered() > 0:
             ${ week[0].day[2].time_9_pm }
           % endif
-      - "week1_wed_over": |
-          % if week.number_gathered() > 0:
-            ${ week[0].day[2].time_over }
-          % endif
       # Week 1 - Thursday  
       - "week1_thurs_8am": |
           % if week.number_gathered() > 0:
@@ -2638,10 +2703,6 @@ attachment:
       - "week1_thurs_9pm": |
           % if week.number_gathered() > 0:
             ${ week[0].day[3].time_9_pm }
-          % endif
-      - "week1_thurs_over": |
-          % if week.number_gathered() > 0:
-            ${ week[0].day[3].time_over }
           % endif
       # Week 1 - Friday
       - "week1_fri_8am": |
@@ -2700,10 +2761,6 @@ attachment:
           % if week.number_gathered() > 0:
             ${ week[0].day[4].time_9_pm }
           % endif
-      - "week1_fri_over": |
-          % if week.number_gathered() > 0:
-            ${ week[0].day[4].time_over }
-          % endif
       # Week 1 - Saturday
       - "week1_sat_8am": |
           % if week.number_gathered() > 0:
@@ -2760,10 +2817,6 @@ attachment:
       - "week1_sat_9pm": |
           % if week.number_gathered() > 0:
             ${ week[0].day[5].time_9_pm }
-          % endif
-      - "week1_sat_over": |
-          % if week.number_gathered() > 0:
-            ${ week[0].day[5].time_over }
           % endif
       # Week 1 - Sunday
       - "week1_sun_8am": |
@@ -2822,10 +2875,6 @@ attachment:
           % if week.number_gathered() > 0:
             ${ week[0].day[6].time_9_pm }
           % endif
-      - "week1_sun_over": |
-          % if week.number_gathered() > 0:
-            ${ week[0].day[6].time_over }
-          % endif
       # Week 1 - Monday
       - "week2_mon_8am": |
           % if week.number_gathered() >= 1:
@@ -2882,10 +2931,6 @@ attachment:
       - "week2_mon_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[1].day[0].time_9_pm }
-          % endif
-      - "week2_mon_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[1].day[0].time_over }
           % endif
       # Week 1 - Tuesday
       - "week2_tues_8am": |
@@ -2944,10 +2989,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[1].day[1].time_9_pm }
           % endif
-      - "week2_tues_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[1].day[1].time_over }
-          % endif
       # Week 1 - Wednesday
       - "week2_wed_8am": |
           % if week.number_gathered() >= 1:
@@ -3004,10 +3045,6 @@ attachment:
       - "week2_wed_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[1].day[2].time_9_pm }
-          % endif
-      - "week2_wed_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[1].day[2].time_over }
           % endif
       # Week 1 - Thursday  
       - "week2_thurs_8am": |
@@ -3066,10 +3103,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[1].day[3].time_9_pm }
           % endif
-      - "week2_thurs_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[1].day[3].time_over }
-          % endif
       # Week 1 - Friday
       - "week2_fri_8am": |
           % if week.number_gathered() >= 1:
@@ -3126,10 +3159,6 @@ attachment:
       - "week2_fri_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[1].day[4].time_9_pm }
-          % endif
-      - "week2_fri_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[1].day[4].time_over }
           % endif
       # Week 1 - Saturday
       - "week2_sat_8am": |
@@ -3188,10 +3217,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[1].day[5].time_9_pm }
           % endif
-      - "week2_sat_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[1].day[5].time_over }
-          % endif
       # Week 1 - Sunday
       - "week2_sun_8am": |
           % if week.number_gathered() >= 1:
@@ -3248,10 +3273,6 @@ attachment:
       - "week2_sun_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[1].day[6].time_9_pm }
-          % endif
-      - "week2_sun_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[1].day[6].time_over }
           % endif
       # HOLIDAY PARENTING TIME SCHEDULE 
       - "holiday_groups": ${ parenting_holiday == "holiday_option1" }
@@ -3355,13 +3376,13 @@ attachment:
       - "holiday1_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[0].name.text != "":
-            ${ individual_holidays[0].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[0].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday1_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[0].name.text != "":
-            ${ individual_holidays[0].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[0].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # Mother’s Day
@@ -3396,13 +3417,13 @@ attachment:
       - "holiday2_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[1].name.text != "":
-            ${ individual_holidays[1].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[1].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday2_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[1].name.text != "":
-            ${ individual_holidays[1].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[1].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # Memorial Day
@@ -3437,13 +3458,13 @@ attachment:
       - "holiday3_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[2].name.text != "":
-            ${ individual_holidays[2].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[2].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday3_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[2].name.text != "":
-            ${ individual_holidays[2].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[2].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # Father's Day
@@ -3478,13 +3499,13 @@ attachment:
       - "holiday4_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[3].name.text != "":
-            ${ individual_holidays[3].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[3].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday4_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[3].name.text != "":
-            ${ individual_holidays[3].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[3].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # July 4th
@@ -3519,13 +3540,13 @@ attachment:
       - "holiday5_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[4].name.text != "":
-            ${ individual_holidays[4].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[4].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday5_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[4].name.text != "":
-            ${ individual_holidays[4].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[4].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # Labor Day
@@ -3560,13 +3581,13 @@ attachment:
       - "holiday6_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[5].name.text != "":
-            ${ individual_holidays[5].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[5].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday6_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[5].name.text != "":
-            ${ individual_holidays[5].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[5].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # Halloween
@@ -3601,13 +3622,13 @@ attachment:
       - "holiday7_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[6].name.text != "":
-            ${ individual_holidays[6].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[6].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday7_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[6].name.text != "":
-            ${ individual_holidays[6].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[6].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # Thanksgiving
@@ -3642,13 +3663,13 @@ attachment:
       - "holiday8_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[7].name.text != "":
-            ${ individual_holidays[7].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[7].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday8_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[7].name.text != "":
-            ${ individual_holidays[7].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[7].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # Christmas Eve
@@ -3683,13 +3704,13 @@ attachment:
       - "holiday9_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[8].name.text != "":
-            ${ individual_holidays[8].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[8].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday9_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[8].name.text != "":
-            ${ individual_holidays[8].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[8].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # Christmas Day
@@ -3724,13 +3745,13 @@ attachment:
       - "holiday10_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[9].name.text != "":
-            ${ individual_holidays[9].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[9].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday10_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[9].name.text != "":
-            ${ individual_holidays[9].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[9].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # New Year’s Eve
@@ -3765,13 +3786,13 @@ attachment:
       - "holiday11_start": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[10].name.text != "":
-            ${ individual_holidays[10].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[10].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday11_end": |
           % if parenting_holiday == "holiday_option2":
             % if individual_holidays[10].name.text != "":
-            ${ individual_holidays[10].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(individual_holidays[10].holiday_end, format='h:mm a') }
             % endif          
           % endif
       # custom
@@ -3812,13 +3833,13 @@ attachment:
       - "holiday12_start": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() > 0:
-            ${ other_holidays[0].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[0].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday12_end": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() > 0:
-            ${ other_holidays[0].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[0].holiday_end, format='h:mm a') }
             % endif
           % endif
 
@@ -3859,13 +3880,13 @@ attachment:
       - "holiday13_start": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 1:
-            ${ other_holidays[1].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[1].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday13_end": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 1:
-            ${ other_holidays[1].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[1].holiday_end, format='h:mm a') }
             % endif
           % endif
 
@@ -3906,13 +3927,13 @@ attachment:
       - "holiday14_start": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 2:
-            ${ other_holidays[2].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[2].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday14_end":  |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 2:
-            ${ other_holidays[2].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[2].holiday_end, format='h:mm a') }
             % endif
           % endif
 
@@ -3953,13 +3974,13 @@ attachment:
       - "holiday15_start": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 3:
-            ${ other_holidays[3].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[3].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday15_end":  |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 3:
-            ${ other_holidays[3].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[3].holiday_end, format='h:mm a') }
             % endif
           % endif
 
@@ -4000,13 +4021,13 @@ attachment:
       - "holiday16_start": |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() == 5:
-            ${ other_holidays[4].holiday_start.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[4].holiday_start, format='h:mm a') }
             % endif
           % endif
       - "holiday16_end":  |
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() == 5:
-            ${ other_holidays[4].holiday_end.strftime('%H:%M %p') }
+            ${ format_time(other_holidays[4].holiday_end, format='h:mm a') }
             % endif
           % endif
       
@@ -4288,10 +4309,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[2].day[0].time_9_pm }
           % endif
-      - "week3_mon_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[2].day[0].time_over }
-          % endif
       # Week 3 - Tuesday
       - "week3_tues_8am": |
           % if week.number_gathered() >= 1:
@@ -4348,10 +4365,6 @@ attachment:
       - "week3_tues_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[2].day[1].time_9_pm }
-          % endif
-      - "week3_tues_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[2].day[1].time_over }
           % endif
       # Week 3 - Wednesday
       - "week3_wed_8am": |
@@ -4410,10 +4423,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[2].day[2].time_9_pm }
           % endif
-      - "week3_wed_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[2].day[2].time_over }
-          % endif
       # Week 3 - Thursday  
       - "week3_thurs_8am": |
           % if week.number_gathered() >= 1:
@@ -4470,10 +4479,6 @@ attachment:
       - "week3_thurs_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[2].day[3].time_9_pm }
-          % endif
-      - "week3_thurs_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[2].day[3].time_over }
           % endif
       # Week 3 - Friday
       - "week3_fri_8am": |
@@ -4532,10 +4537,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[2].day[4].time_9_pm }
           % endif
-      - "week3_fri_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[2].day[4].time_over }
-          % endif
       # Week 3 - Saturday
       - "week3_sat_8am": |
           % if week.number_gathered() >= 1:
@@ -4592,10 +4593,6 @@ attachment:
       - "week3_sat_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[2].day[5].time_9_pm }
-          % endif
-      - "week3_sat_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[2].day[5].time_over }
           % endif
       # Week 3 - Sunday
       - "week3_sun_8am": |
@@ -4654,10 +4651,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[2].day[6].time_9_pm }
           % endif
-      - "week3_sun_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[2].day[6].time_over }
-          % endif
       # Week 3 - Monday
       - "week4_mon_8am": |
           % if week.number_gathered() >= 1:
@@ -4714,10 +4707,6 @@ attachment:
       - "week4_mon_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[3].day[0].time_9_pm }
-          % endif
-      - "week4_mon_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[3].day[0].time_over }
           % endif
       # Week 3 - Tuesday
       - "week4_tues_8am": |
@@ -4776,10 +4765,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[3].day[1].time_9_pm }
           % endif
-      - "week4_tues_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[3].day[1].time_over }
-          % endif
       # Week 3 - Wednesday
       - "week4_wed_8am": |
           % if week.number_gathered() >= 1:
@@ -4836,10 +4821,6 @@ attachment:
       - "week4_wed_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[3].day[2].time_9_pm }
-          % endif
-      - "week4_wed_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[3].day[2].time_over }
           % endif
       # Week 3 - Thursday  
       - "week4_thurs_8am": |
@@ -4898,10 +4879,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[3].day[3].time_9_pm }
           % endif
-      - "week4_thurs_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[3].day[3].time_over }
-          % endif
       # Week 3 - Friday
       - "week4_fri_8am": |
           % if week.number_gathered() >= 1:
@@ -4958,10 +4935,6 @@ attachment:
       - "week4_fri_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[3].day[4].time_9_pm }
-          % endif
-      - "week4_fri_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[3].day[4].time_over }
           % endif
       # Week 3 - Saturday
       - "week4_sat_8am": |
@@ -5020,10 +4993,6 @@ attachment:
           % if week.number_gathered() >= 1:
             ${ week[3].day[5].time_9_pm }
           % endif
-      - "week4_sat_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[3].day[5].time_over }
-          % endif
       # Week 3 - Sunday
       - "week4_sun_8am": |
           % if week.number_gathered() >= 1:
@@ -5080,10 +5049,6 @@ attachment:
       - "week4_sun_9pm": |
           % if week.number_gathered() >= 1:
             ${ week[3].day[6].time_9_pm }
-          % endif
-      - "week4_sun_over": |
-          % if week.number_gathered() >= 1:
-            ${ week[3].day[6].time_over }
           % endif
       - "addtional_information": |
           % if additional_time:
