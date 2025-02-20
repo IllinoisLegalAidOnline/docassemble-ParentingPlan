@@ -772,11 +772,17 @@ subquestion: |
     9pm<BR>Over | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
     ${ current_week.name} | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
 
-    
+
   % endfor
 fields:
   - Do you need to schedule another week?: week.there_is_another
     datatype: yesnoradio
+css: |
+  <style>
+    .table-responsive:not(:first-child) {
+      margin-top: 5em;
+    }
+  </style>
 ---
 code: |
   week[i].name.text = "Week " + str(i + 1)
@@ -2188,7 +2194,7 @@ subquestion: |
   
   % for cnt, current_week in enumerate(week):
     ${ current_week.name} | Mon | Tue | Wed | Thur | Fri | Sat | Sun
-    -----|-----|-----|-----|-----|-----|-----|-----
+    -------|-----|-----|-----|-----|-----|-----|-----
     8am | ${ current_week.day[0].time_8_am } | ${ current_week.day[1].time_8_am } | ${ current_week.day[2].time_8_am } | ${ current_week.day[3].time_8_am } | ${ current_week.day[4].time_8_am } | ${ current_week.day[5].time_8_am } | ${ current_week.day[6].time_8_am } |
     9am | ${ current_week.day[0].time_9_am } | ${ current_week.day[1].time_9_am } | ${ current_week.day[2].time_9_am } | ${ current_week.day[3].time_9_am } | ${ current_week.day[4].time_9_am } | ${ current_week.day[5].time_9_am } | ${ current_week.day[6].time_9_am } |
     10am | ${ current_week.day[0].time_10_am } | ${ current_week.day[1].time_10_am } | ${ current_week.day[2].time_10_am } | ${ current_week.day[3].time_10_am } | ${ current_week.day[4].time_10_am } | ${ current_week.day[5].time_10_am } | ${ current_week.day[6].time_10_am } |
@@ -2204,8 +2210,7 @@ subquestion: |
     8pm | ${ current_week.day[0].time_8_pm } | ${ current_week.day[1].time_8_pm } | ${ current_week.day[2].time_8_pm } | ${ current_week.day[3].time_8_pm } | ${ current_week.day[4].time_8_pm } | ${ current_week.day[5].time_8_pm } | ${ current_week.day[6].time_8_pm } |
     9pm<BR>Over | ${ current_week.day[0].time_9_pm } | ${ current_week.day[1].time_9_pm } | ${ current_week.day[2].time_9_pm } | ${ current_week.day[3].time_9_pm } | ${ current_week.day[4].time_9_pm } | ${ current_week.day[5].time_9_pm } | ${ current_week.day[6].time_9_pm } |
     ${ current_week.name} | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
-    
-    
+
   % endfor
   % if week.number_gathered() < 4:
   ${ week.add_action() }
@@ -2213,6 +2218,15 @@ subquestion: |
 
   If you need to delete a week from the schedule:
   ${ week.table }
+css: |
+  <style>
+    .table-responsive:not(:first-child) {
+      margin-top: 5em;
+    }
+    .table-responsive:last-child {
+      margin-top: 1em;
+    }
+  </style>
 ---
 objects:
   - al_user_bundle: ALDocumentBundle.using(elements=[instructions, parenting_plan_bundle], filename="completed_parenting_plan.pdf", title="All forms", enabled=True)
