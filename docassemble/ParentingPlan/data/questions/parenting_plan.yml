@@ -482,10 +482,12 @@ sets:
   - children[i].name.first
   - children[i].name.last
 question: |
-  ${ capitalize(ordinal(i)) } child's information?
+  What is the ${ ordinal(i) } child's name?
 subquestion:
   This minor child must be born to or adopted by you and 
   ${other_parties[0].name.full(middle="full")}.
+
+  Only children under 18 can be included in a Parenting Plan.
 fields:
   - code: |
       children[i].name_fields()
@@ -502,6 +504,13 @@ fields:
     datatype: integer
     min: 0
     max: 18
+  - Months: children[i].months
+    datatype: integer
+    min: 0
+    max: 12
+    show if:
+      variable: children[i].age
+      is: 0
 ---
 id: any other children
 question: |
@@ -624,8 +633,9 @@ fields:
       variable: communication
       is: other
 validation code: |
-  if daily_start > daily_end:
-    validation_error("The start time must be before the end time.")
+  if defined('daily_start') and defined('daily_end'):
+    if daily_start > daily_end:
+      validation_error("The start time must be before the end time.")
 ---
 id: primary custody
 question: |
@@ -819,10 +829,10 @@ subquestion: |
   % endif
   [NEWLINE] [NEWLINE]
   <button id="current_parent" class="btn btn-info">
-    <i class="fas fa-check-square"></i> Select all times for <b>Me (${ users[0].initials })</b>
+    <i class="fas fa-check-circle"></i> Select all times for <b>Me (${ users[0].initials })</b>
   </button>
   <button id="other_parent" class="btn btn-info">
-    <i class="fas fa-check-square"></i> Select all times for <b>${ other_parties[0].name.full(middle="full")} (${ other_parties[0].initials })</b>
+    <i class="fas fa-check-circle"></i> Select all times for <b>${ other_parties[0].name.full(middle="full")} (${ other_parties[0].initials })</b>
   </button>
   [NEWLINE]  [NEWLINE]
   <button id="clear_all" class="btn btn-warning">
@@ -931,7 +941,21 @@ script: |
         }
       }
       function handleClearButtonClick(buttonId) {
-        document.getElementById('daform').reset();
+        var button = document.getElementById(buttonId);
+        if (button) {
+          button.addEventListener('click', function(event) {
+            event.preventDefault();
+            var radios = document.querySelectorAll('input[type="radio"]');
+            radios.forEach(function(radio) {
+              radio.checked = false;
+              var label = document.querySelector('label[for="' + radio.id + '"]');
+              if (label) {
+                  label.classList.remove('btn-primary');
+                  label.classList.add('btn-light', 'bg-secondary-subtle', 'text-light-emphasis');
+              }
+            });
+          });
+        }
       }
       // Add event listeners to buttons
       handleButtonClick('current_parent', "${ users[0].initials }");
@@ -968,13 +992,7 @@ fields:
     choices: 
       - Holidays are put into two groups.: holiday_option1
       - Each holiday is handled separately.: holiday_option2
-      - This means I will fill out the holiday parenting time later.: other
-  - note: |
-      I will decide holiday parenting time later. This means I will fill out the schedule
-      by hand or attach one to the *${form_name}*.
-    show if: 
-      variable: parenting_holiday
-      is: other
+      - I will decide holiday parenting time later. This means I will fill out the schedule by hand or attach one to the *${form_name}*.: other
 ---
 id: holiday by groups
 question: |
@@ -1225,6 +1243,7 @@ fields:
       is: split
   - Other plan for spring break: spring_break_other
     datatype: area
+    maxlength: 150
     show if:
       variable: spring_break
       is: other
@@ -1268,6 +1287,7 @@ fields:
       is: split
   - Other plan for summer break: summer_break_other
     datatype: area
+    maxlength: 150
     show if:
       variable: summer_break
       is: other
@@ -1310,6 +1330,7 @@ fields:
       is: split
   - Other plan for winter break: winter_break_other
     datatype: area
+    maxlength: 150
     show if:
       variable: winter_break
       is: other
@@ -2023,8 +2044,17 @@ review:
       % for holiday in holiday_list.true_values():
       * ${ holiday }
       % endfor
-    show if: parenting_holiday == "holiday_option2"
 
+      % for holiday in other_holidays:
+      * ${ holiday }
+      % endfor
+    show if: parenting_holiday == "holiday_option2"
+  - Edit: individual_holidays.revisit
+    button: |
+      **View the holidays in the parenting time schedule:**
+
+      Use the edit button to the right to edit the holiday details.
+    show if: parenting_holiday == "holiday_option2"
   - Edit: spring_break
     button: |
       **What parenting time schedule do you want for school spring break?**
@@ -2160,7 +2190,7 @@ columns:
   - Child name: |
       row_item.name.full()
   - Age: |
-      row_item.age
+      row_item.age if row_item.age > 0 else str(row_item.months) + str(' months')
   - Edit name: |
       action_button_html(url_action(row_item.attr_name("name.first")), label="Edit", icon="pencil-alt")
   - Edit age: |  
@@ -2227,6 +2257,81 @@ css: |
       margin-top: 1em;
     }
   </style>
+---
+id: holidays review screen
+continue button field: individual_holidays.revisit
+question: |
+  Reviewing holiday schedules
+subquestion: |
+  
+  % for cnt, current_holiday in enumerate(individual_holidays):
+    % if defined('current_holiday.holiday_year') and current_holiday.holiday_year:
+    **Odd Years**:
+      % if current_holiday.holiday_year == 'me':
+      ${ users[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'them':
+      ${ other_parties[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'odd':
+      ${ users[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'even':
+      ${ other_parties[0].name.full(middle="full") }
+      % endif
+      <BR>
+    **Even Years**:
+      % if current_holiday.holiday_year == 'me':
+      ${ users[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'them':
+      ${ other_parties[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'odd':
+      ${ other_parties[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'even':
+      ${ users[0].name.full(middle="full") }
+      % endif
+      <BR>
+    % endif 
+    % if defined('current_holiday.holiday_start') and current_holiday.holiday_start:
+    **Start time**: ${ format_time(current_holiday.holiday_start, format='h:mm a') }<BR>
+    % endif  
+    % if defined('current_holiday.holiday_end') and current_holiday.holiday_end:
+    **End time**: ${ format_time(current_holiday.holiday_end, format='h:mm a') }<BR>
+    % endif
+    % if defined('individual_holidays[' + str(cnt) + '].holiday_year') and current_holiday.holiday_year:
+    ${ action_button_html(url_action('individual_holidays[' + str(cnt) + '].holiday_year'), label="Edit", icon="pencil-alt") }
+
+    [NEWLINE]
+    % endif
+  % endfor
+
+  % for cnt, current_holiday in enumerate(other_holidays):
+    **Additional Holiday**: ${ current_holiday.name }<BR>
+    **Odd Years**:
+      % if current_holiday.holiday_year == 'me':
+      ${ users[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'them':
+      ${ other_parties[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'odd':
+      ${ users[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'even':
+      ${ other_parties[0].name.full(middle="full") }
+      % endif
+      <BR>
+    **Even Years**:
+      % if current_holiday.holiday_year == 'me':
+      ${ users[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'them':
+      ${ other_parties[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'odd':
+      ${ other_parties[0].name.full(middle="full") }
+      % elif current_holiday.holiday_year == 'even':
+      ${ users[0].name.full(middle="full") }
+      % endif
+      <BR>
+    **Start time**: ${ format_time(current_holiday.holiday_start, format='h:mm a') }<BR>
+    **End time**: ${ format_time(current_holiday.holiday_end, format='h:mm a') }<BR>
+    ${ action_button_html(url_action('other_holidays[' + str(cnt) + '].holiday_year'), label="Edit", icon="pencil-alt") }
+
+    [NEWLINE]
+  % endfor
 ---
 objects:
   - al_user_bundle: ALDocumentBundle.using(elements=[instructions, parenting_plan_bundle], filename="completed_parenting_plan.pdf", title="All forms", enabled=True)
@@ -2401,7 +2506,7 @@ attachment:
             % endif
           % endif
       - "child_name1": ${ children[0].name.full() }
-      - "child_age1": ${ children[0].age }
+      - "child_age1": ${ children[0].age if children[0].age > 0 else children[i].months + str(' months') }
       - "child_name2": |
           % if children.number_gathered() >= 2:
           ${ children[1].name.full() }
@@ -4103,11 +4208,11 @@ attachment:
           % endif
       - "summer_break_other_start": |
           % if summer_break == "other":
-          ${ format_date(summer_break_start, 'MMMM D, YYYY') }
+          ${ summer_break_start }
           % endif
       - "summer_break_other_end": |
           % if summer_break == "other":
-          ${ format_date(summer_break_end, 'MMMM D, YYYY') }
+          ${ summer_break_end }
           % endif
       - "no_winter_break": ${ winter_break == "no" }
       - "winter_break_split": ${ winter_break == "split" }
@@ -4134,11 +4239,11 @@ attachment:
           % endif
       - "winter_break_other_start": |
           % if winter_break == "other":
-          ${ format_date(winter_break_start, 'MMMM D, YYYY') }
+          ${ winter_break_start }
           % endif
       - "winter_break_other_end": |
           % if winter_break == "other":
-          ${ format_date(winter_break_end, 'MMMM D, YYYY') }
+          ${ winter_break_end }
           % endif
       - "transportation_petitioner": |
           % if party_label == 'petitioner':
@@ -4169,7 +4274,7 @@ attachment:
           % if exchange_location == "location":
           ${ exchange_address.address.on_one_line(bare=True) }
           % endif
-      - "additional_parenting_time": ${ additional_time }
+      - "additional_parenting_time": ${ additional_time or week.number_gathered() >= 3 }
       # 10. FIRST REFUSAL FOR CHILDCARE 
       - "refusal_no": ${ first_refusal }
       - "refusal_yes": ${ not first_refusal }
@@ -4254,13 +4359,13 @@ attachment:
     fields:
       - "county_name": ${ case_county }
       - "case_number": ${ case_number }
-      - "petitioner_name": |
+      - "plan_petitioner": |
           % if party_label == 'petitioner':
           ${ users[0].name.full(middle='full') }
           % else:
           ${ other_parties[0].name.full(middle='full') }
           % endif
-      - "respondent_name": |
+      - "plan_respondent": |
           % if party_label == 'respondent':
           ${ users[0].name.full(middle='full') }
           % else:
@@ -4268,800 +4373,800 @@ attachment:
           % endif
       # Week 3 - Monday
       - "week3_mon_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_8_am }
           % endif
       - "week3_mon_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_9_am }
           % endif
       - "week3_mon_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_10_am }
           % endif
       - "week3_mon_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_11_am }
           % endif
       - "week3_mon_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_noon }
           % endif
       - "week3_mon_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_1_pm }
           % endif
       - "week3_mon_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_2_pm }
           % endif
       - "week3_mon_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_3_pm }
           % endif
       - "week3_mon_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_4_pm }
           % endif
       - "week3_mon_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_5_pm }
           % endif
       - "week3_mon_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_6_pm }
           % endif
       - "week3_mon_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_7_pm }
           % endif
       - "week3_mon_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_8_pm }
           % endif
       - "week3_mon_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[0].time_9_pm }
           % endif
       # Week 3 - Tuesday
       - "week3_tues_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_8_am }
           % endif
       - "week3_tues_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_9_am }
           % endif
       - "week3_tues_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_10_am }
           % endif
       - "week3_tues_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_11_am }
           % endif
       - "week3_tues_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_noon }
           % endif
       - "week3_tues_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_1_pm }
           % endif
       - "week3_tues_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_2_pm }
           % endif
       - "week3_tues_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_3_pm }
           % endif
       - "week3_tues_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_4_pm }
           % endif
       - "week3_tues_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_5_pm }
           % endif
       - "week3_tues_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_6_pm }
           % endif
       - "week3_tues_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_7_pm }
           % endif
       - "week3_tues_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_8_pm }
           % endif
       - "week3_tues_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[1].time_9_pm }
           % endif
       # Week 3 - Wednesday
       - "week3_wed_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_8_am }
           % endif
       - "week3_wed_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_9_am }
           % endif
       - "week3_wed_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_10_am }
           % endif
       - "week3_wed_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_11_am }
           % endif
       - "week3_wed_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_noon }
           % endif
       - "week3_wed_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_1_pm }
           % endif
       - "week3_wed_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_2_pm }
           % endif
       - "week3_wed_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_3_pm }
           % endif
       - "week3_wed_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_4_pm }
           % endif
       - "week3_wed_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_5_pm }
           % endif
       - "week3_wed_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_6_pm }
           % endif
       - "week3_wed_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_7_pm }
           % endif
       - "week3_wed_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_8_pm }
           % endif
       - "week3_wed_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[2].time_9_pm }
           % endif
       # Week 3 - Thursday  
       - "week3_thurs_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_8_am }
           % endif
       - "week3_thurs_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_9_am }
           % endif
       - "week3_thurs_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_10_am }
           % endif
       - "week3_thurs_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_11_am }
           % endif
       - "week3_thurs_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_noon }
           % endif
       - "week3_thurs_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_1_pm }
           % endif
       - "week3_thurs_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_2_pm }
           % endif
       - "week3_thurs_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_3_pm }
           % endif
       - "week3_thurs_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_4_pm }
           % endif
       - "week3_thurs_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_5_pm }
           % endif
       - "week3_thurs_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_6_pm }
           % endif
       - "week3_thurs_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_7_pm }
           % endif
       - "week3_thurs_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_8_pm }
           % endif
       - "week3_thurs_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[3].time_9_pm }
           % endif
       # Week 3 - Friday
       - "week3_fri_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_8_am }
           % endif
       - "week3_fri_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_9_am }
           % endif
       - "week3_fri_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_10_am }
           % endif
       - "week3_fri_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_11_am }
           % endif
       - "week3_fri_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_noon }
           % endif
       - "week3_fri_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_1_pm }
           % endif
       - "week3_fri_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_2_pm }
           % endif
       - "week3_fri_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_3_pm }
           % endif
       - "week3_fri_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_4_pm }
           % endif
       - "week3_fri_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_5_pm }
           % endif
       - "week3_fri_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_6_pm }
           % endif
       - "week3_fri_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_7_pm }
           % endif
       - "week3_fri_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_8_pm }
           % endif
       - "week3_fri_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[4].time_9_pm }
           % endif
       # Week 3 - Saturday
       - "week3_sat_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_8_am }
           % endif
       - "week3_sat_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_9_am }
           % endif
       - "week3_sat_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_10_am }
           % endif
       - "week3_sat_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_11_am }
           % endif
       - "week3_sat_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_noon }
           % endif
       - "week3_sat_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_1_pm }
           % endif
       - "week3_sat_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_2_pm }
           % endif
       - "week3_sat_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_3_pm }
           % endif
       - "week3_sat_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_4_pm }
           % endif
       - "week3_sat_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_5_pm }
           % endif
       - "week3_sat_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_6_pm }
           % endif
       - "week3_sat_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_7_pm }
           % endif
       - "week3_sat_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_8_pm }
           % endif
       - "week3_sat_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[5].time_9_pm }
           % endif
       # Week 3 - Sunday
       - "week3_sun_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_8_am }
           % endif
       - "week3_sun_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_9_am }
           % endif
       - "week3_sun_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_10_am }
           % endif
       - "week3_sun_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_11_am }
           % endif
       - "week3_sun_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_noon }
           % endif
       - "week3_sun_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_1_pm }
           % endif
       - "week3_sun_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_2_pm }
           % endif
       - "week3_sun_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_3_pm }
           % endif
       - "week3_sun_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_4_pm }
           % endif
       - "week3_sun_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_5_pm }
           % endif
       - "week3_sun_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_6_pm }
           % endif
       - "week3_sun_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_7_pm }
           % endif
       - "week3_sun_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_8_pm }
           % endif
       - "week3_sun_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() >= 3:
             ${ week[2].day[6].time_9_pm }
           % endif
       # Week 3 - Monday
       - "week4_mon_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_8_am }
           % endif
       - "week4_mon_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_9_am }
           % endif
       - "week4_mon_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_10_am }
           % endif
       - "week4_mon_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_11_am }
           % endif
       - "week4_mon_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_noon }
           % endif
       - "week4_mon_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_1_pm }
           % endif
       - "week4_mon_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_2_pm }
           % endif
       - "week4_mon_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_3_pm }
           % endif
       - "week4_mon_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_4_pm }
           % endif
       - "week4_mon_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_5_pm }
           % endif
       - "week4_mon_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_6_pm }
           % endif
       - "week4_mon_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_7_pm }
           % endif
       - "week4_mon_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_8_pm }
           % endif
       - "week4_mon_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[0].time_9_pm }
           % endif
       # Week 3 - Tuesday
       - "week4_tues_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_8_am }
           % endif
       - "week4_tues_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_9_am }
           % endif
       - "week4_tues_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_10_am }
           % endif
       - "week4_tues_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_11_am }
           % endif
       - "week4_tues_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_noon }
           % endif
       - "week4_tues_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_1_pm }
           % endif
       - "week4_tues_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_2_pm }
           % endif
       - "week4_tues_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_3_pm }
           % endif
       - "week4_tues_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_4_pm }
           % endif
       - "week4_tues_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_5_pm }
           % endif
       - "week4_tues_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_6_pm }
           % endif
       - "week4_tues_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_7_pm }
           % endif
       - "week4_tues_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_8_pm }
           % endif
       - "week4_tues_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[1].time_9_pm }
           % endif
       # Week 3 - Wednesday
       - "week4_wed_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_8_am }
           % endif
       - "week4_wed_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_9_am }
           % endif
       - "week4_wed_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_10_am }
           % endif
       - "week4_wed_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_11_am }
           % endif
       - "week4_wed_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_noon }
           % endif
       - "week4_wed_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_1_pm }
           % endif
       - "week4_wed_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_2_pm }
           % endif
       - "week4_wed_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_3_pm }
           % endif
       - "week4_wed_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_4_pm }
           % endif
       - "week4_wed_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_5_pm }
           % endif
       - "week4_wed_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_6_pm }
           % endif
       - "week4_wed_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_7_pm }
           % endif
       - "week4_wed_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_8_pm }
           % endif
       - "week4_wed_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[2].time_9_pm }
           % endif
       # Week 3 - Thursday  
       - "week4_thurs_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_8_am }
           % endif
       - "week4_thurs_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_9_am }
           % endif
       - "week4_thurs_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_10_am }
           % endif
       - "week4_thurs_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_11_am }
           % endif
       - "week4_thurs_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_noon }
           % endif
       - "week4_thurs_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_1_pm }
           % endif
       - "week4_thurs_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_2_pm }
           % endif
       - "week4_thurs_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_3_pm }
           % endif
       - "week4_thurs_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_4_pm }
           % endif
       - "week4_thurs_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_5_pm }
           % endif
       - "week4_thurs_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_6_pm }
           % endif
       - "week4_thurs_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_7_pm }
           % endif
       - "week4_thurs_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_8_pm }
           % endif
       - "week4_thurs_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[3].time_9_pm }
           % endif
       # Week 3 - Friday
       - "week4_fri_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_8_am }
           % endif
       - "week4_fri_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_9_am }
           % endif
       - "week4_fri_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_10_am }
           % endif
       - "week4_fri_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_11_am }
           % endif
       - "week4_fri_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_noon }
           % endif
       - "week4_fri_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_1_pm }
           % endif
       - "week4_fri_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_2_pm }
           % endif
       - "week4_fri_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_3_pm }
           % endif
       - "week4_fri_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_4_pm }
           % endif
       - "week4_fri_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_5_pm }
           % endif
       - "week4_fri_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_6_pm }
           % endif
       - "week4_fri_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_7_pm }
           % endif
       - "week4_fri_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_8_pm }
           % endif
       - "week4_fri_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[4].time_9_pm }
           % endif
       # Week 3 - Saturday
       - "week4_sat_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_8_am }
           % endif
       - "week4_sat_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_9_am }
           % endif
       - "week4_sat_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_10_am }
           % endif
       - "week4_sat_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_11_am }
           % endif
       - "week4_sat_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_noon }
           % endif
       - "week4_sat_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_1_pm }
           % endif
       - "week4_sat_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_2_pm }
           % endif
       - "week4_sat_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_3_pm }
           % endif
       - "week4_sat_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_4_pm }
           % endif
       - "week4_sat_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_5_pm }
           % endif
       - "week4_sat_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_6_pm }
           % endif
       - "week4_sat_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_7_pm }
           % endif
       - "week4_sat_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_8_pm }
           % endif
       - "week4_sat_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[5].time_9_pm }
           % endif
       # Week 3 - Sunday
       - "week4_sun_8am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_8_am }
           % endif
       - "week4_sun_9am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_9_am }
           % endif
       - "week4_sun_10am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_10_am }
           % endif
       - "week4_sun_11am": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_11_am }
           % endif
       - "week4_sun_noon": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_noon }
           % endif
       - "week4_sun_1pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_1_pm }
           % endif
       - "week4_sun_2pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_2_pm }
           % endif
       - "week4_sun_3pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_3_pm }
           % endif
       - "week4_sun_4pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_4_pm }
           % endif
       - "week4_sun_5pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_5_pm }
           % endif
       - "week4_sun_6pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_6_pm }
           % endif
       - "week4_sun_7pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_7_pm }
           % endif
       - "week4_sun_8pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_8_pm }
           % endif
       - "week4_sun_9pm": |
-          % if week.number_gathered() >= 1:
+          % if week.number_gathered() == 4:
             ${ week[3].day[6].time_9_pm }
           % endif
       - "addtional_information": |
