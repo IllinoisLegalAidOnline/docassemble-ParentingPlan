@@ -44,7 +44,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.ParentingPlan',
-      version='0.7.3',
+      version='0.8.0',
       description=('A docassemble extension.'),
       long_description='# docassemble.ParentingPlan\n\nA docassemble extension.\n\n## Author\n\nMatt Newsted, mnewsted@illinoislegalaid.org\n\n',
       long_description_content_type='text/markdown',
