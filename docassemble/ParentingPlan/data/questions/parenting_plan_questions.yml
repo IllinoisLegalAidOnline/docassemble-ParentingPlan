@@ -923,27 +923,27 @@ depends on:
 code: |
   # This preserves the order of the list instead of sorting them
   if holiday_list[get_holiday_name(new_years_day)]:
-    holiday_objects[new_years_day].holiday_year
+    new_years_day.holiday_year
   if holiday_list[get_holiday_name(mothers_day)]:
-    holiday_objects[mothers_day].holiday_year
+    mothers_day.holiday_year
   if holiday_list[get_holiday_name(memorial_day)]:
-    holiday_objects[memorial_day].holiday_year
+    memorial_day.holiday_year
   if holiday_list[get_holiday_name(fathers_day)]:
-    holiday_objects[fathers_day].holiday_year
+    fathers_day.holiday_year
   if holiday_list[get_holiday_name(july_4th)]:
-    holiday_objects[july_4th].holiday_year
+    july_4th.holiday_year
   if holiday_list[get_holiday_name(labor_day)]:
-    holiday_objects[labor_day].holiday_year
+    labor_day.holiday_year
   if holiday_list[get_holiday_name(halloween)]:
-    holiday_objects[halloween].holiday_year
+    halloween.holiday_year
   if holiday_list[get_holiday_name(thanksgiving)]:
-    holiday_objects[thanksgiving].holiday_year
+    thanksgiving.holiday_year
   if holiday_list[get_holiday_name(christmas_eve)]:
-    holiday_objects[christmas_eve].holiday_year
+    christmas_eve.holiday_year
   if holiday_list[get_holiday_name(christmas_day)]:
-    holiday_objects[christmas_day].holiday_year
+    christmas_day.holiday_year
   if holiday_list[get_holiday_name(new_years_eve)]:
-    holiday_objects[new_years_eve].holiday_year
+    new_years_eve.holiday_year
 
   prepopulated_holidays = True
 ---
