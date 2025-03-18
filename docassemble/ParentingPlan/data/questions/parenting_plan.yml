@@ -30,7 +30,7 @@ objects:
   - christmas_eve: Thing
   - christmas_day: Thing
   - new_years_eve: Thing
-  - holiday_list: DAList
+  - holiday_list: DAList.using(object_type=Thing, there_are_any=True)
   - other_holidays: DAList.using(object_type=Thing, complete_attribute='complete')
   - exchange_address: ALIndividual
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
@@ -1113,6 +1113,7 @@ fields:
     choices:
       code: | 
         holidays
+continue button field: holiday_list.there_is_another
 ---
 reconsider: True
 depends on:
@@ -1163,6 +1164,7 @@ fields:
     datatype: time
     default: 9:00 PM
 validation code: |
+  holiday_list.revisit = True
   if x.holiday_start >= x.holiday_end:
     validation_error("The start time must be before the end time.", field="x.holiday_end")
 ---
@@ -2230,41 +2232,41 @@ continue button field: holiday_list.revisit
 question: |
   Reviewing holiday schedules
 subquestion: |
-      Holiday | Edit 
-      -------- | -----
-      % if holiday_list[get_holiday_name(new_years_day)]:
-      ${get_holiday_name(new_years_day)} | ${ action_button_html(url_action('new_years_day.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      %if holiday_list[get_holiday_name(mothers_day)]:
-        ${get_holiday_name(mothers_day)} | ${ action_button_html(url_action('mothers_day.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(memorial_day)]:
-        ${get_holiday_name(memorial_day)} | ${ action_button_html(url_action('memorial_day.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(fathers_day)]:
-        ${get_holiday_name(fathers_day)} | ${ action_button_html(url_action('fathers_day.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(july_4th)]:
-        ${get_holiday_name(july_4th)} | ${ action_button_html(url_action('july_4th.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(labor_day)]:
-        ${get_holiday_name(labor_day)} | ${ action_button_html(url_action('labor_day.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(halloween)]:
-        ${get_holiday_name(halloween)} | ${ action_button_html(url_action('halloween.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(thanksgiving)]:
-        ${get_holiday_name(thanksgiving)} | ${ action_button_html(url_action('thanksgiving.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(christmas_eve)]:
-        ${get_holiday_name(christmas_eve)} | ${ action_button_html(url_action('christmas_eve.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(christmas_day)]:
-        ${get_holiday_name(christmas_day)} | ${ action_button_html(url_action('christmas_day.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
-      % if holiday_list[get_holiday_name(new_years_eve)]:
-        ${get_holiday_name(new_years_eve)} | ${ action_button_html(url_action('new_years_eve.holiday_year'), label="Edit", icon="pencil-alt") }
-      % endif
+  Holiday | Edit 
+  -------- | -----
+  % if holiday_list[get_holiday_name(new_years_day)]:
+  ${get_holiday_name(new_years_day)} | ${ action_button_html(url_action('new_years_day.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  %if holiday_list[get_holiday_name(mothers_day)]:
+    ${get_holiday_name(mothers_day)} | ${ action_button_html(url_action('mothers_day.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(memorial_day)]:
+    ${get_holiday_name(memorial_day)} | ${ action_button_html(url_action('memorial_day.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(fathers_day)]:
+    ${get_holiday_name(fathers_day)} | ${ action_button_html(url_action('fathers_day.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(july_4th)]:
+    ${get_holiday_name(july_4th)} | ${ action_button_html(url_action('july_4th.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(labor_day)]:
+    ${get_holiday_name(labor_day)} | ${ action_button_html(url_action('labor_day.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(halloween)]:
+    ${get_holiday_name(halloween)} | ${ action_button_html(url_action('halloween.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(thanksgiving)]:
+    ${get_holiday_name(thanksgiving)} | ${ action_button_html(url_action('thanksgiving.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(christmas_eve)]:
+    ${get_holiday_name(christmas_eve)} | ${ action_button_html(url_action('christmas_eve.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(christmas_day)]:
+    ${get_holiday_name(christmas_day)} | ${ action_button_html(url_action('christmas_day.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
+  % if holiday_list[get_holiday_name(new_years_eve)]:
+    ${get_holiday_name(new_years_eve)} | ${ action_button_html(url_action('new_years_eve.holiday_year'), label="Edit", icon="pencil-alt") }
+  % endif
 
 ---
 id: additional holidays table
@@ -2350,8 +2352,8 @@ objects:
 objects:
   - parenting_plan_bundle: ALDocumentBundle.using(title="Parenting Plan", filename="parenting_plan.pdf", enabled=True, elements=[
         parenting_plan,
-        additional_parenting_time,
         additional_children,
+        additional_parenting_time,
       ])
 ---
 objects:
