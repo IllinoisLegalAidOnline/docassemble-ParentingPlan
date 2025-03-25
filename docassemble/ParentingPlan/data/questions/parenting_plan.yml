@@ -128,19 +128,24 @@ code: |
   set_progress(60)
   nav.set_section('section_schedule')
   if parenting_time == "yes":
-	  users[0].name.initials
-	  schedule_start
-	  week.gather()
-    holiday_time
+    users[0].name.initials
+    schedule_start
+    week.gather()
+
+  if holiday_time:
     if parenting_holiday == "holiday_option1":
+      users[0].name.initials
       holiday_groups
     if parenting_holiday == "holiday_option2":
+      users[0].name.initials
       if holiday_list.any_true():
         prepopulated_holidays
         other_holidays.gather()
-    spring_break
-    summer_break
-    winter_break
+    if parenting_holiday != "other":
+      users[0].name.initials
+      spring_break
+      summer_break
+      winter_break
   transportation
   exchange_location
   if additional_time:
@@ -764,7 +769,7 @@ fields:
 ---
 id: parent initials
 question: |
-  Intials for each parent
+  Initials for each parent
 subquestion: |
   Enter the initials for each parent. These initials will be used in the *${form_name}* to identify who has parenting time.
 fields:
@@ -820,6 +825,9 @@ css: |
   <style>
     .table-responsive:not(:first-child) {
       margin-top: 5em;
+    }
+    .table-responsive:last-child {
+      margin-top: 1em;
     }
   </style>
 ---
@@ -985,6 +993,8 @@ subquestion: |
   on Christmas Eve, because the Holiday schedule has 1st Priority. 
 continue button field: holiday_time
 ---
+depends on:
+  - holiday_time
 id: parenting time holiday
 question: |
   How do you want to handle parenting time during holidays?
@@ -1951,7 +1961,7 @@ review:
 
       * ${ other_parties[0].name.initials } will be ${ other_parties[0].name.full(middle="full") }
       % endif
-    show if: parenting_time == "yes"
+    show if: parenting_time == "yes" or parenting_holiday != "other"
   - Edit: schedule_start
     button: |
       **Schedule will start on:** ${ format_date(schedule_start, "MMMM d, YYYY") }
@@ -1973,7 +1983,7 @@ review:
       % elif parenting_holiday == "other":
       * I will decide holiday parenting time later.
       % endif
-    show if: parenting_time == "yes"
+    show if: holiday_time
   - Edit: holiday_groups
     button: |
       **Holidays by group are as follows:**
@@ -1994,7 +2004,7 @@ review:
       % elif showifdef('other_a5_yes') and other_a5_yes or showifdef('other_b5_yes') and other_b5_yes:
       Fifth Additonal | ${ other_a5 if showifdef('other_a5_yes') and other_a5_yes else '' }| ${ other_b5 if showifdef('other_b5_yes') and other_b5_yes else '' }
       % endif
-    show if: showifdef('parenting_holiday') and parenting_holiday == "holiday_option1"
+    show if: parenting_holiday == "holiday_option1"
   - Edit: holiday_list
     button: |
       **Which common holidays do you want to include?**
@@ -2002,18 +2012,18 @@ review:
       % for holiday in holiday_list.true_values():
       * ${ holiday }
       % endfor
-    show if: showifdef('parenting_holiday') and parenting_holiday == "holiday_option2"
+    show if: parenting_holiday == "holiday_option2"
   - Edit: holiday_list.revisit
     button: |
       **View/edit common holidays in the parenting time schedule:**
 
       Use the edit button to the right to edit the common holidays.
-    show if: showifdef('parenting_holiday') and parenting_holiday == "holiday_option2"
+    show if: parenting_holiday == "holiday_option2"
   - Edit: other_holidays.there_are_any
     button: |
       **Do you have additional holidays you want to include?**
       ${word(yesno(other_holidays.there_are_any))}      
-    show if: showifdef('parenting_holiday') and parenting_holiday == "holiday_option2"
+    show if: parenting_holiday == "holiday_option2"
   - Edit: other_holidays.revisit
     button: |
       **Addtitional holidays to include:**
@@ -2021,7 +2031,7 @@ review:
       % for holiday in other_holidays:
       * ${ holiday.name.text }
       % endfor
-    show if: showifdef('parenting_holiday') and parenting_holiday == "holiday_option2" and other_holidays.there_are_any
+    show if: parenting_holiday == "holiday_option2" and other_holidays.there_are_any
   - Edit: spring_break
     button: |
       **What parenting time schedule do you want for school spring break?**
@@ -2049,7 +2059,7 @@ review:
 
       Start day/time: ${ spring_break_end }
       % endif
-    show if: parenting_time == "yes"
+    show if: parenting_holiday != "other"
   - Edit: summer_break
     button: |
       **What parenting time schedule do you want for school summer break?**
@@ -2078,7 +2088,7 @@ review:
 
       Start day/time: ${ summer_break_end }
       % endif
-    show if: parenting_time == "yes"
+    show if: parenting_holiday != "other"
   - Edit: winter_break
     button: |
       **What parenting time schedule do you want for school winter break?**
@@ -2107,7 +2117,7 @@ review:
 
       Start day/time: ${ winter_break_end }
       % endif
-    show if: parenting_time == "yes"
+    show if: parenting_holiday != "other"
   - Edit: transportation
     button: |
       **Transportation of children:**
@@ -2392,10 +2402,12 @@ attachment:
           ${ other_parties[0].name.full(middle='full') }
           % endif
       - "petitioner_address": |
-          % if not hide_contact:
-            % if party_label == 'petitioner':
+          % if party_label == 'petitioner':
+            % if not hide_contact:
             ${ users[0].address.on_one_line(bare=True) }
-            % else:
+            % endif
+          % else:
+            % if has_other_address:
             ${ other_parties[0].address.on_one_line(bare=True) }
             % endif
           % endif
@@ -3411,103 +3423,78 @@ attachment:
           % endif
       # HOLIDAY PARENTING TIME SCHEDULE 
       - "holiday_groups": |
-          % if parenting_time == "yes":
           ${ parenting_holiday == "holiday_option1" }
-          % endif
       - "groupA1": Thanksgiving Day
       - "groupA2": Christmas Eve
       - "groupA3": New Year's Eve
       - "groupA4": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_a1_yes') and other_a1_yes:
             ${ other_a1 }
             % endif
           % endif
-          % endif
       - "groupA5": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_a2_yes') and other_a2_yes:
             ${ other_a2 }
             % endif
           % endif
-          % endif
       - "groupA6": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_a3_yes') and other_a3_yes:
             ${ other_a3 }
             % endif
           % endif
-          % endif
       - "groupA7": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_a4_yes') and other_a4_yes:
             ${ other_a4 }
             % endif
           % endif
-          % endif
       - "groupA8": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_a5_yes') and other_a5_yes:
             ${ other_a5 }
             % endif
           % endif
-          % endif
       - "groupB1": 4th of July
       - "groupB2": Labor Day
       - "groupB3": Christmas Day
       - "groupB4": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_b1_yes') and other_b1_yes:
             ${ other_b1 }
             % endif
           % endif
-          % endif
       - "groupB5": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_b2_yes') and other_b2_yes:
             ${ other_b2 }
             % endif
           % endif
-          % endif
       - "groupB6": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_b3_yes') and other_b3_yes:
             ${ other_b3 }
             % endif
           % endif
-          % endif
       - "groupB7": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_b4_yes') and other_b4_yes:
             ${ other_b4 }
             % endif
           % endif
-          % endif
       - "groupB8": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option1":
             % if defined('other_b5_yes') and other_b5_yes:
             ${ other_b5_yes }
             % endif
           % endif
-          % endif
       # Individual Holidays
       - "holiday_odd_even": |
-          % if parenting_time == "yes":
           ${ parenting_holiday == "holiday_option2" }
-          % endif
       # # New Year’s Day
       - "holiday1_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(new_years_day)]:
               % if new_years_day.holiday_year == 'me':
@@ -3520,10 +3507,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday1_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(new_years_day)]:
               % if new_years_day.holiday_year == 'me':
@@ -3537,26 +3522,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday1_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(new_years_day)]:
             ${ format_time(new_years_day.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday1_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(new_years_day)]:
             ${ format_time(new_years_day.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Mother’s Day
       - "holiday2_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(mothers_day)]:
               % if mothers_day.holiday_year == 'me':
@@ -3569,10 +3548,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday2_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(mothers_day)]:
               % if mothers_day.holiday_year == 'me':
@@ -3586,26 +3563,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday2_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(mothers_day)]:
             ${ format_time(mothers_day.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday2_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(mothers_day)]:
             ${ format_time(mothers_day.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Memorial Day
       - "holiday3_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(memorial_day)]:
               % if memorial_day.holiday_year == 'me':
@@ -3618,10 +3589,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday3_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(memorial_day)]:
               % if memorial_day.holiday_year == 'me':
@@ -3635,26 +3604,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday3_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(memorial_day)]:
             ${ format_time(memorial_day.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday3_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(memorial_day)]:
             ${ format_time(memorial_day.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Father's Day
       - "holiday4_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(fathers_day)]:
               % if fathers_day.holiday_year == 'me':
@@ -3667,10 +3630,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday4_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(fathers_day)]:
               % if fathers_day.holiday_year == 'me':
@@ -3684,26 +3645,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday4_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(fathers_day)]:
             ${ format_time(fathers_day.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday4_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(fathers_day)]:
             ${ format_time(fathers_day.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # July 4th
       - "holiday5_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(july_4th)]:
               % if july_4th.holiday_year == 'me':
@@ -3716,10 +3671,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday5_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(july_4th)]:
               % if july_4th.holiday_year == 'me':
@@ -3733,26 +3686,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday5_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(july_4th)]:
             ${ format_time(july_4th.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday5_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(july_4th)]:
             ${ format_time(july_4th.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Labor Day
       - "holiday6_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(labor_day)]:
               % if labor_day.holiday_year == 'me':
@@ -3765,10 +3712,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday6_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(labor_day)]:
               % if labor_day.holiday_year == 'me':
@@ -3782,26 +3727,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday6_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(labor_day)]:
             ${ format_time(labor_day.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday6_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(labor_day)]:
             ${ format_time(labor_day.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Halloween
       - "holiday7_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(halloween)]:
               % if halloween.holiday_year == 'me':
@@ -3814,10 +3753,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday7_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(halloween)]:
               % if halloween.holiday_year == 'me':
@@ -3831,26 +3768,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday7_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(halloween)]:
             ${ format_time(halloween.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday7_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(halloween)]:
             ${ format_time(halloween.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Thanksgiving
       - "holiday8_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(thanksgiving)]:
               % if thanksgiving.holiday_year == 'me':
@@ -3863,10 +3794,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday8_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(thanksgiving)]:
               % if thanksgiving.holiday_year == 'me':
@@ -3880,26 +3809,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday8_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(thanksgiving)]:
             ${ format_time(thanksgiving.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday8_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(thanksgiving)]:
             ${ format_time(thanksgiving.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Christmas Eve
       - "holiday9_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(christmas_eve)]:
               % if christmas_eve.holiday_year == 'me':
@@ -3912,10 +3835,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday9_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(christmas_eve)]:
               % if christmas_eve.holiday_year == 'me':
@@ -3929,26 +3850,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday9_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(christmas_eve)]:
             ${ format_time(christmas_eve.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday9_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(christmas_eve)]:
             ${ format_time(christmas_eve.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Christmas Day
       - "holiday10_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(christmas_day)]:
               % if christmas_day.holiday_year == 'me':
@@ -3961,10 +3876,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday10_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(christmas_day)]:
               % if christmas_day.holiday_year == 'me':
@@ -3978,26 +3891,20 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday10_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(christmas_day)]:
             ${ format_time(christmas_day.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday10_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(christmas_day)]:
             ${ format_time(christmas_day.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # New Year’s Eve
       - "holiday11_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(new_years_eve)]:
               % if new_years_eve.holiday_year == 'me':
@@ -4010,10 +3917,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday11_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(new_years_eve)]:
               % if new_years_eve.holiday_year == 'me':
@@ -4027,34 +3932,26 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday11_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(new_years_eve)]:
             ${ format_time(new_years_eve.holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday11_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if holiday_list[get_holiday_name(new_years_eve)]:
             ${ format_time(new_years_eve.holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       # Additional Holidays
       - "holiday12_name": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 1:
             ${ other_holidays[0].name.text }
             % endif
           % endif
-          % endif
       - "holiday12_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 1:
               % if other_holidays[0].holiday_year == 'me':
@@ -4067,10 +3964,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday12_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 1:
               % if other_holidays[0].holiday_year == 'me':
@@ -4084,33 +3979,25 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday12_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 1:
             ${ format_time(other_holidays[0].holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday12_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 1:
             ${ format_time(other_holidays[0].holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday13_name": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 2:
             ${ other_holidays[1].name.text }
             % endif
           % endif
-          % endif
       - "holiday13_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 2:
               % if other_holidays[1].holiday_year == 'me':
@@ -4123,10 +4010,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday13_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 2:
               % if other_holidays[1].holiday_year == 'me':
@@ -4140,33 +4025,25 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday13_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 2:
             ${ format_time(other_holidays[1].holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday13_end": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 2:
             ${ format_time(other_holidays[1].holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday14_name": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 3:
             ${ other_holidays[2].name.text }
             % endif
           % endif
-          % endif
       - "holiday14_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 3:
               % if other_holidays[2].holiday_year == 'me':
@@ -4179,10 +4056,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday14_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 3:
               % if other_holidays[2].holiday_year == 'me':
@@ -4196,34 +4071,25 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday14_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 3:
             ${ format_time(other_holidays[2].holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday14_end":  |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 3:
             ${ format_time(other_holidays[2].holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
-
       - "holiday15_name": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 4:
             ${ other_holidays[3].name.text }
             % endif
           % endif
-          % endif
       - "holiday15_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 4:
               % if other_holidays[3].holiday_year == 'me':
@@ -4236,10 +4102,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday15_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 4:
               % if other_holidays[3].holiday_year == 'me':
@@ -4253,34 +4117,25 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday15_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 4:
             ${ format_time(other_holidays[3].holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday15_end":  |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 4:
             ${ format_time(other_holidays[3].holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
-
       - "holiday16_name": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 5:
             ${ other_holidays[4].name.text }
             % endif
           % endif
-          % endif
       - "holiday16_odd": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 5:
               % if other_holidays[4].holiday_year == 'me':
@@ -4293,10 +4148,8 @@ attachment:
               ${ other_parties[0].name.initials }
               % endif
             % endif
-          % endif
           % endif
       - "holiday16_even": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 5:
               % if other_holidays[4].holiday_year == 'me':
@@ -4310,36 +4163,31 @@ attachment:
               % endif
             % endif
           % endif
-          % endif
       - "holiday16_start": |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 5:
             ${ format_time(other_holidays[4].holiday_start, format='h:mm a') }
             % endif
           % endif
-          % endif
       - "holiday16_end":  |
-          % if parenting_time == "yes":
           % if parenting_holiday == "holiday_option2":
             % if other_holidays.number_gathered() >= 5:
             ${ format_time(other_holidays[4].holiday_end, format='h:mm a') }
             % endif
           % endif
-          % endif
       
 
       # SCHOOL BREAKS PARENTING TIME SCHEDULE 
       - "no_spring_break": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ spring_break == "no" }
           % endif
       - "spring_break_split": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ spring_break == "split" }
           % endif
       - "spring_break_even": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if spring_break == "split":
             % if spring_break_year == "me":
           ${ users[0].name.initials }
@@ -4349,7 +4197,7 @@ attachment:
           % endif
           % endif
       - "spring_break_odd": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if spring_break == "split":
             % if spring_break_year == "me":
           ${ other_parties[0].name.initials }
@@ -4359,37 +4207,37 @@ attachment:
           % endif
           % endif
       - "spring_break_other": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ spring_break == "other" }
           % endif
       - "spring_break_other_details": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if spring_break == "other":
           ${ spring_break_other }
           % endif
           % endif
       - "spring_break_other_start": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if spring_break == "other":
           ${ spring_break_start }
           % endif
           % endif
       - "spring_break_other_end": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if spring_break == "other":
           ${ spring_break_end }
           % endif
           % endif
       - "no_summer_break": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ summer_break == "no" }
           % endif
       - "summer_break_split": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ summer_break == "split" }
           % endif
       - "summer_break_even": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if summer_break == "split":
             % if summer_break_year == "me":
           ${ users[0].name.initials }
@@ -4399,7 +4247,7 @@ attachment:
           % endif
           % endif
       - "summer_break_odd": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if summer_break == "split":
             % if summer_break_year == "me":
           ${ other_parties[0].name.initials }
@@ -4409,37 +4257,37 @@ attachment:
           % endif
           % endif
       - "summer_break_other": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ summer_break == "other" }
           % endif
       - "summer_break_other_details": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if summer_break == "other":
           ${ summer_break_other }
           % endif
           % endif
       - "summer_break_other_start": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if summer_break == "other":
           ${ summer_break_start }
           % endif
           % endif
       - "summer_break_other_end": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if summer_break == "other":
           ${ summer_break_end }
           % endif
           % endif
       - "no_winter_break": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ winter_break == "no" }
           % endif
       - "winter_break_split": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ winter_break == "split" }
           % endif
       - "winter_break_even": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if winter_break == "split":
             % if winter_break_year == "me":
           ${ users[0].name.initials }
@@ -4449,7 +4297,7 @@ attachment:
           % endif
           % endif
       - "winter_break_odd": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if winter_break == "split":
             % if winter_break_year == "me":
           ${ other_parties[0].name.initials }
@@ -4459,23 +4307,23 @@ attachment:
           % endif
           % endif
       - "winter_break_other": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           ${ winter_break == "other" }
           % endif
       - "winter_break_other_details": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if winter_break == "other":
           ${ winter_break_other }
           % endif
           % endif
       - "winter_break_other_start": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if winter_break == "other":
           ${ winter_break_start }
           % endif
           % endif
       - "winter_break_other_end": |
-          % if parenting_time == "yes":
+          % if parenting_holiday != "other":
           % if winter_break == "other":
           ${ winter_break_end }
           % endif
