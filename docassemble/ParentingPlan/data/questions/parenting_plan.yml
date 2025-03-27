@@ -141,7 +141,7 @@ code: |
       if holiday_list.any_true():
         prepopulated_holidays
         other_holidays.gather()
-    if parenting_holiday != "other":
+    if school_breaks:
       users[0].name.initials
       spring_break
       summer_break
@@ -1243,6 +1243,13 @@ code: |
   if other_holidays.number_gathered() == 5:
     other_holidays.there_is_another = False
 ---
+id: school breaks
+question: |
+  Do you want to include school break schedules?
+fields:
+  - no label: school_breaks
+    datatype: yesnoradio
+---
 id: spring break
 question: |
   What parenting time schedule do you want for school spring break?
@@ -1961,7 +1968,7 @@ review:
 
       * ${ other_parties[0].name.initials } will be ${ other_parties[0].name.full(middle="full") }
       % endif
-    show if: parenting_time == "yes" or parenting_holiday != "other"
+    show if: parenting_time == "yes" or parenting_holiday != "other" or school_breaks
   - Edit: schedule_start
     button: |
       **Schedule will start on:** ${ format_date(schedule_start, "MMMM d, YYYY") }
@@ -2032,6 +2039,10 @@ review:
       * ${ holiday.name.text }
       % endfor
     show if: parenting_holiday == "holiday_option2" and other_holidays.there_are_any
+  - Edit: school_breaks
+    button: |
+      **Do you want to include school break schedules?**
+      ${ word(yesno(school_breaks)) }
   - Edit: spring_break
     button: |
       **What parenting time schedule do you want for school spring break?**
@@ -2059,7 +2070,7 @@ review:
 
       Start day/time: ${ spring_break_end }
       % endif
-    show if: parenting_holiday != "other"
+    show if: school_breaks
   - Edit: summer_break
     button: |
       **What parenting time schedule do you want for school summer break?**
@@ -2088,7 +2099,7 @@ review:
 
       Start day/time: ${ summer_break_end }
       % endif
-    show if: parenting_holiday != "other"
+    show if: school_breaks
   - Edit: winter_break
     button: |
       **What parenting time schedule do you want for school winter break?**
@@ -2117,7 +2128,7 @@ review:
 
       Start day/time: ${ winter_break_end }
       % endif
-    show if: parenting_holiday != "other"
+    show if: school_breaks
   - Edit: transportation
     button: |
       **Transportation of children:**
@@ -2604,7 +2615,7 @@ attachment:
       
       # WEEKLY PARENTING TIME SCHEDULE
       - "petitioner_initals": |
-          % if parenting_time == "yes":
+          % if parenting_time == "yes" or parenting_holiday != "other" or school_breaks:
           % if party_label == 'petitioner':
           ${ users[0].name.initials }
           % else:
@@ -2612,7 +2623,7 @@ attachment:
           % endif
           % endif
       - "respondent_initals": | 
-          % if parenting_time == "yes":
+          % if parenting_time == "yes" or parenting_holiday != "other" or school_breaks:
           % if party_label == 'respondent':
           ${ users[0].name.initials }
           % else:
@@ -3487,7 +3498,7 @@ attachment:
       - "groupB8": |
           % if parenting_holiday == "holiday_option1":
             % if defined('other_b5_yes') and other_b5_yes:
-            ${ other_b5_yes }
+            ${ other_b5 }
             % endif
           % endif
       # Individual Holidays
@@ -4179,15 +4190,15 @@ attachment:
 
       # SCHOOL BREAKS PARENTING TIME SCHEDULE 
       - "no_spring_break": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ spring_break == "no" }
           % endif
       - "spring_break_split": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ spring_break == "split" }
           % endif
       - "spring_break_even": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if spring_break == "split":
             % if spring_break_year == "me":
           ${ users[0].name.initials }
@@ -4197,7 +4208,7 @@ attachment:
           % endif
           % endif
       - "spring_break_odd": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if spring_break == "split":
             % if spring_break_year == "me":
           ${ other_parties[0].name.initials }
@@ -4207,37 +4218,37 @@ attachment:
           % endif
           % endif
       - "spring_break_other": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ spring_break == "other" }
           % endif
       - "spring_break_other_details": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if spring_break == "other":
           ${ spring_break_other }
           % endif
           % endif
       - "spring_break_other_start": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if spring_break == "other":
           ${ spring_break_start }
           % endif
           % endif
       - "spring_break_other_end": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if spring_break == "other":
           ${ spring_break_end }
           % endif
           % endif
       - "no_summer_break": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ summer_break == "no" }
           % endif
       - "summer_break_split": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ summer_break == "split" }
           % endif
       - "summer_break_even": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if summer_break == "split":
             % if summer_break_year == "me":
           ${ users[0].name.initials }
@@ -4247,7 +4258,7 @@ attachment:
           % endif
           % endif
       - "summer_break_odd": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if summer_break == "split":
             % if summer_break_year == "me":
           ${ other_parties[0].name.initials }
@@ -4257,37 +4268,37 @@ attachment:
           % endif
           % endif
       - "summer_break_other": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ summer_break == "other" }
           % endif
       - "summer_break_other_details": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if summer_break == "other":
           ${ summer_break_other }
           % endif
           % endif
       - "summer_break_other_start": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if summer_break == "other":
           ${ summer_break_start }
           % endif
           % endif
       - "summer_break_other_end": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if summer_break == "other":
           ${ summer_break_end }
           % endif
           % endif
       - "no_winter_break": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ winter_break == "no" }
           % endif
       - "winter_break_split": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ winter_break == "split" }
           % endif
       - "winter_break_even": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if winter_break == "split":
             % if winter_break_year == "me":
           ${ users[0].name.initials }
@@ -4297,7 +4308,7 @@ attachment:
           % endif
           % endif
       - "winter_break_odd": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if winter_break == "split":
             % if winter_break_year == "me":
           ${ other_parties[0].name.initials }
@@ -4307,23 +4318,23 @@ attachment:
           % endif
           % endif
       - "winter_break_other": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           ${ winter_break == "other" }
           % endif
       - "winter_break_other_details": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if winter_break == "other":
           ${ winter_break_other }
           % endif
           % endif
       - "winter_break_other_start": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if winter_break == "other":
           ${ winter_break_start }
           % endif
           % endif
       - "winter_break_other_end": |
-          % if parenting_holiday != "other":
+          % if school_breaks:
           % if winter_break == "other":
           ${ winter_break_end }
           % endif
