@@ -396,7 +396,7 @@ content: |
 ---
 id: your employer
 question: |
-  Are you employed?
+  Do you have a job?
 subquestion: |
   If you do not currently have an employer, select **No**.
 fields:
@@ -479,7 +479,7 @@ fields:
 ---
 id: other parties employment
 question: |
-  Is ${other_parties[0].name.full(middle="full")}'s employed?
+  Does ${other_parties[0].name.full(middle="full")} have a job?
 fields:
   - no label: has_other_employer
     datatype: yesnoradio
@@ -1193,6 +1193,14 @@ id: other holidays
 question: |
   Do you want to add other holidays to the parenting time schedule?
 subquestion: |
+  % if holiday_list.any_true():
+  You told us about parenting time on:
+
+  % for holiday in holiday_list.true_values():
+  * ${ holiday }
+  % endfor
+  
+  % endif
   **Note:** You can add up to five additional holidays.
 fields: 
   - no label: other_holidays.there_are_any
@@ -1230,7 +1238,7 @@ id: holiday gather other
 question: |
   Do you want to include another holiday on the parenting time schedule?
 subquestion: |
-  So far you have selected the following holidays:
+  You told us about parenting time on:
 
   % for holiday in holiday_list.true_values():
   * ${ holiday }
@@ -1754,7 +1762,11 @@ review:
   - Edit: case_number
     button: |
       **Case number:**
+      % if case_number == "":
+      None entered
+      % else:
       ${ case_number }
+      % endif
   - note: |
       <h4>Family members</h4>
   - Edit: users[0].name.first
@@ -1787,7 +1799,7 @@ review:
       % endif
   - Edit: has_employer
     button: |
-      **Do you have income from employment?**
+      **Do you have a job?**
       ${word(yesno(has_employer))}
   - Edit: employer.name.first
     button: |
@@ -1806,7 +1818,7 @@ review:
       ${ other_parties[0].name.full(middle="full") }
   - Edit: has_other_address
     button: |
-      **Have other parent's address:**
+      **Is ${ other_parties[0].name.full(middle="full") }'s address listed on other court forms?**
       ${ word(yesno(has_other_address))}  
   - Edit: other_parties[0].address.address
     button: |
@@ -1830,7 +1842,7 @@ review:
       % endif
   - Edit: has_other_employer
     button: |
-      **Other parent's employment?**
+      **Does ${ other_parties[0].name.full(middle="full") } have a job?**
       ${word(yesno(has_other_employer))}
   - Edit: other_employer.name.first
     button: |
@@ -1845,7 +1857,7 @@ review:
     show if: has_other_employer
   - Edit: children.revisit
     button: |
-      **Children and age**
+      **Children and ages**
 
       % for child in children:
         * ${ child.name.full() }, ${ child.age_in_years() if child.age_in_years() > 1 else str(child.age_in_months()) + ' months' }
@@ -1854,7 +1866,7 @@ review:
       <h4>Decision making</h4>
   - Edit: eduction_decisions
     button: |
-      **Education decisions made by:**
+      **Education decisions will be made by:**
 
       % if eduction_decisions == "me":
       ${ users[0].name.full(middle="full") }
@@ -1865,7 +1877,7 @@ review:
       % endif
   - Edit: health_decisions
     button: |
-      **Healthcare decisions made by:**
+      **Healthcare decisions will be made by:**
 
       % if health_decisions == "me":
       ${ users[0].name.full(middle="full") }
@@ -1876,7 +1888,7 @@ review:
       % endif
   - Edit: religious_decisions
     button: |
-      **Religious decisions made by:**
+      **Religious decisions will be made by:**
 
       % if religious_decisions == "me":
       ${ users[0].name.full(middle="full") }
@@ -1887,7 +1899,7 @@ review:
       % endif
   - Edit: activities_decisions
     button: |
-      **Activity decisions made by:**
+      **Activity decisions will be made by:**
 
       % if activities_decisions == "me":
       ${ users[0].name.full(middle="full") }
@@ -1901,27 +1913,23 @@ review:
       <h4>Parenting Time</h4>
   - Edit: parenting_time
     button: |
-      **Weekly parenting time schedule:**
+      **Include a parenting time weekly schedule?**
       ${ capitalize(parenting_time) }
 
   - Edit: users[0].name.initials
     button: |
       **Initials for each parent:**
 
-      % if parenting_time:
-      * ${ users[0].name.initials } will be ${ users[0].name.full(middle="full") }
-
-      * ${ other_parties[0].name.initials } will be ${ other_parties[0].name.full(middle="full") }
-      % endif
+      * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
+      * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
+    show if: parenting_time == "yes" or parenting_holiday != "other" or school_breaks
   - Edit: schedule_start
     button: |
       **Schedule will start on:** ${ format_date(schedule_start, "MMMM d, YYYY") }
     show if: parenting_time == "yes"
   - Edit: week.revisit
     button: |
-      **View weekly parenting time schedule:**
-
-      Use the edit button to the right to view/edit/delete weekly schedule.
+      **Use the Edit button to review the weekly schedule.**
     show if: parenting_time == "yes"
   - Edit: parenting_holiday
     button: |
@@ -1963,15 +1971,17 @@ review:
     button: |
       **Which common holidays do you want to include?**
 
+      % if holiday_list.any_true():
       % for holiday in holiday_list.true_values():
       * ${ holiday }
       % endfor
+      % else:
+      None selected
+      % endif
     show if: parenting_holiday == "holiday_option2"
   - Edit: holiday_list.revisit
     button: |
-      **View/edit common holidays in the parenting time schedule:**
-
-      Use the edit button to the right to edit the common holidays.
+      **Use the Edit button to review the common holidays.**
     show if: parenting_holiday == "holiday_option2"
   - Edit: other_holidays.there_are_any
     button: |
@@ -1988,11 +1998,11 @@ review:
     show if: parenting_holiday == "holiday_option2" and other_holidays.there_are_any
   - Edit: school_breaks
     button: |
-      **Do you want to include school break schedules?**
+      **Do you want to include a parenting time schedule during school breaks?**
       ${ word(yesno(school_breaks)) }
   - Edit: spring_break
     button: |
-      **What parenting time schedule do you want for school spring break?**
+      **What parenting time schedule do you want for spring break?**
 
       % if spring_break == "no":
       * No spring break schedule
@@ -2020,7 +2030,7 @@ review:
     show if: school_breaks
   - Edit: summer_break
     button: |
-      **What parenting time schedule do you want for school summer break?**
+      **What parenting time schedule do you want for summer break?**
 
       % if summer_break == "no":
       * No summer break schedule
@@ -2049,7 +2059,7 @@ review:
     show if: school_breaks
   - Edit: winter_break
     button: |
-      **What parenting time schedule do you want for school winter break?**
+      **What parenting time schedule do you want for winter break?**
 
       % if winter_break == "no":
       * No winter break schedule
@@ -2078,19 +2088,17 @@ review:
     show if: school_breaks
   - Edit: transportation
     button: |
-      **Transportation of children:**
+      **Parenting time transportation of children:**
 
       % if transportation == "me":
-      * ${ users[0].name.full(middle="full") } will provide all transportation.
+      ${ users[0].name.full(middle="full") } will provide all transportation.
       % elif transportation == "them":
-      * ${ other_parties[0].name.full(middle="full") } will provide all transportation.
+      ${ other_parties[0].name.full(middle="full") } will provide all transportation.
       % elif transportation == "pick_up":
-      * Each parent will pick up the children at the start of their parenting time.
+      Each parent will pick up the children at the start of their parenting time.
       % elif transportation == "drop_off":
-      * Each parent will drop off the children at the end of their parenting time.
+      Each parent will drop off the children at the end of their parenting time.
       % elif transportation == "other":
-      * Transportation will be handled as follows:
-      
       ${ transportation_other } 
       % endif
   - Edit: exchange_location
@@ -2100,19 +2108,17 @@ review:
       % if exchange_location == "homes":
       * Drop off and pick up of the children be at each parent's homes unless both parties in advance to a different meeting place.
       % elif exchange_location == "location":
-      * Drop off and pick up will take place at a specific location:
+      Drop off and pick up will take place at:
       
-      ${ exchange_address.location }
-      
-      ${ exchange_address.address.on_one_line(bare=True) }
+      ${ exchange_address.location }, ${ exchange_address.address.on_one_line(bare=True) }
       % endif
   - Edit: first_refusal
     button: |
-      **Right of first refusal for childcare?**
+      **Does each parent have the right of first refusal for childcare?**
       ${word(yesno(first_refusal))}
   - Edit: communication
     button: |
-      **Children communicate with other parent?**
+      **When can children communicate with the other parent?**
 
       % if communication == "anytime":
       Anytime
@@ -2121,7 +2127,6 @@ review:
 
       **Start**:
       ${ format_time(daily_start, 'hh:mm a') }
-
       **End**:
       ${ format_time(daily_end, 'hh:mm a') }
       % elif communication == "other":
@@ -2134,7 +2139,7 @@ review:
       ${word(yesno(additional_time))}
   - Edit: additional_time_details
     button: |
-      **What else do you want to include about parenting time?**
+      **Additional parenting time information:**
 
       ${ additional_time_details }
     show if: additional_time
