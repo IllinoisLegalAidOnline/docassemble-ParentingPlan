@@ -133,19 +133,21 @@ code: |
     week.gather()
 
   if holiday_time:
-    if parenting_holiday == "holiday_option1":
-      users[0].name.initials
+    users[0].name.initials
+
+    if parenting_holiday == "holiday_option1": 
       holiday_groups
+
     if parenting_holiday == "holiday_option2":
-      users[0].name.initials
       if holiday_list.any_true():
         prepopulated_holidays
         other_holidays.gather()
+
     if school_breaks:
-      users[0].name.initials
       spring_break
       summer_break
       winter_break
+
   transportation
   exchange_location
   if additional_time:
@@ -1723,7 +1725,6 @@ continue button field: terms_accept_changes_b
 #################### REVIEW SCREEN #########################
 id: review screen
 event: review_answers
-skip undefined: False
 question: |
   Review screen
 subquestion: |
@@ -1968,7 +1969,6 @@ review:
 
       * ${ other_parties[0].name.initials } will be ${ other_parties[0].name.full(middle="full") }
       % endif
-    show if: parenting_time == "yes" or parenting_holiday != "other" or school_breaks
   - Edit: schedule_start
     button: |
       **Schedule will start on:** ${ format_date(schedule_start, "MMMM d, YYYY") }
@@ -1990,7 +1990,6 @@ review:
       % elif parenting_holiday == "other":
       * I will decide holiday parenting time later.
       % endif
-    show if: holiday_time
   - Edit: holiday_groups
     button: |
       **Holidays by group are as follows:**
@@ -2002,13 +2001,17 @@ review:
       Required | New Year's Eve | Christmas Day
       % if showifdef('other_a1_yes') and other_a1_yes or showifdef('other_b1_yes') and other_b1_yes:
       First Additonal | ${ other_a1 if showifdef('other_a1_yes') and other_a1_yes else '' } | ${ other_b1 if showifdef('other_b1_yes') and other_b1_yes else '' }
-      % elif showifdef('other_a2_yes') and other_a2_yes or showifdef('other_b2_yes') and other_b2_yes:
+      % endif
+      % if showifdef('other_a2_yes') and other_a2_yes or showifdef('other_b2_yes') and other_b2_yes:
       Second Additonal | ${ other_a2 if showifdef('other_a2_yes') and other_a2_yes else '' } | ${ other_b2 if showifdef('other_b2_yes') and other_b2_yes else '' }
-      % elif showifdef('other_a3_yes') and other_a3_yes or showifdef('other_b3_yes') and other_b3_yes:
+      % endif
+      % if showifdef('other_a3_yes') and other_a3_yes or showifdef('other_b3_yes') and other_b3_yes:
       Third Additonal | ${ other_a3 if showifdef('other_a3_yes') and other_a3_yes else '' } | ${ other_b3 if showifdef('other_b3_yes') and other_b3_yes else '' }
-      % elif showifdef('other_a4_yes') and other_a4_yes or showifdef('other_b4_yes') and other_b4_yes:
+      % endif
+      % if showifdef('other_a4_yes') and other_a4_yes or showifdef('other_b4_yes') and other_b4_yes:
       Fourth Additonal | ${ other_a4 if showifdef('other_a4_yes') and other_a4_yes else '' } | ${ other_b4 if showifdef('other_b4_yes') and other_b4_yes else '' }
-      % elif showifdef('other_a5_yes') and other_a5_yes or showifdef('other_b5_yes') and other_b5_yes:
+      % endif
+      % if showifdef('other_a5_yes') and other_a5_yes or showifdef('other_b5_yes') and other_b5_yes:
       Fifth Additonal | ${ other_a5 if showifdef('other_a5_yes') and other_a5_yes else '' }| ${ other_b5 if showifdef('other_b5_yes') and other_b5_yes else '' }
       % endif
     show if: parenting_holiday == "holiday_option1"
@@ -2615,7 +2618,7 @@ attachment:
       
       # WEEKLY PARENTING TIME SCHEDULE
       - "petitioner_initals": |
-          % if parenting_time == "yes" or parenting_holiday != "other" or school_breaks:
+          % if holiday_time:
           % if party_label == 'petitioner':
           ${ users[0].name.initials }
           % else:
@@ -2623,7 +2626,7 @@ attachment:
           % endif
           % endif
       - "respondent_initals": | 
-          % if parenting_time == "yes" or parenting_holiday != "other" or school_breaks:
+          % if holiday_time:
           % if party_label == 'respondent':
           ${ users[0].name.initials }
           % else:
@@ -4462,7 +4465,6 @@ attachment:
     variable name: additional_parenting_time[i]
     filename: additional_parenting_time
     pdf template file: additional_parenting_time.pdf
-    skip undefined: True
     editable: False
     fields:
       - "county_name": ${ case_county }
@@ -5293,7 +5295,6 @@ attachment:
     variable name: additional_children[i]
     filename: additional_children
     pdf template file: additional_children.pdf
-    skip undefined: True
     editable: False
     fields:
       - "county_name": ${ case_county }
