@@ -1,6 +1,6 @@
 import os
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
 
@@ -44,17 +44,16 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.ParentingPlan',
-      version='0.8.10',
+      version='0.8.11',
       description=('A docassemble extension.'),
-      long_description='# docassemble.ParentingPlan\n\nA docassemble extension.\n\n## Author\n\nMatt Newsted, mnewsted@illinoislegalaid.org\n\n',
+      long_description='# docassemble.ParentingPlan\r\n\r\nA docassemble extension.\r\n\r\n## Author\r\n\r\nMatt Newsted, mnewsted@illinoislegalaid.org\r\n\r\n',
       long_description_content_type='text/markdown',
       author='Jim Graszer',
       author_email='jim@lemmalegal.com',
       license='The MIT License (MIT)',
       url='https://docassemble.org',
-      packages=find_packages(),
-      namespace_packages=['docassemble'],
-      install_requires=['docassemble.AssemblyLine>=3.1.0', 'docassemble.ILAO>=1.0.99'],
+      packages=find_namespace_packages(),
+      install_requires=['docassemble.AssemblyLine>=3.2.0', 'docassemble.ILAO>=1.0.99'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/ParentingPlan/', package='docassemble.ParentingPlan'),
      )
