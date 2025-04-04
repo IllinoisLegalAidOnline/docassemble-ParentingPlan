@@ -2166,21 +2166,22 @@ review:
       % endif
   - Edit: mediation_option
     button: |
-      **Mediation is required on all issues:**
+      **Mediation is required on all issues?**
       ${word(yesno( mediation_option == "mediation" ))}
 
       % if mediation_option == "no_mediation":
-        % if mediation_reason['parent']:
-        * One parent has all significant decision-making responsibility.
-        % endif
-        % if mediation_reason['history']:
-        * There is a history of domestic violence between the parties.
-        % endif
-        % if mediation_reason['history']:
-        * Other reason: ${ other_reasons } 
-        % endif
+      Mediation is not required on all issues because:
+      
+      % if mediation_reason['parent']:
+      * One parent has all significant decision-making responsibility.
       % endif
-
+      % if mediation_reason['history']:
+      * There is a history of domestic violence between the parties.
+      % endif
+      % if mediation_reason['history']:
+      * Other reason: ${ other_reasons } 
+      % endif
+      % endif
 
     
 ---
