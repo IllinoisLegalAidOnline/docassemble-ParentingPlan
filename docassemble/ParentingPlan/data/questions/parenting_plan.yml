@@ -179,7 +179,7 @@ subquestion: |
 
   This program helps you make a plan to set parental responsibilities (formerly custody) and parenting time (formerly visitation).
 
-  To learn more, read ILAO's guide about [**getting parental responsibilities of a child**](https://www.illinoislegalaid.org/node/29896).
+  To learn more, read ILAO's article, [**Parenting plan for parental responsibilities**](https://www.illinoislegalaid.org/node/29851).
 
 ---
 id: how to use
@@ -1925,7 +1925,7 @@ review:
     show if: parenting_time == "yes" or parenting_holiday != "other" or school_breaks
   - Edit: schedule_start
     button: |
-      **Schedule will start on:** ${ format_date(schedule_start, "MMMM d, YYYY") }
+      **Weekly schedule will start on:** ${ format_date(schedule_start, "MMMM d, YYYY") }
     show if: parenting_time == "yes"
   - Edit: week.revisit
     button: |
