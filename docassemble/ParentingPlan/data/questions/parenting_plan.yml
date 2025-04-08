@@ -83,6 +83,7 @@ mandatory: True
 code: |
   nav.set_section('section_intro')
   sees_nav_bar
+  snapshot_start
   set_progress(5)
   how_to_use
   accept_terms
@@ -168,8 +169,44 @@ code: |
   set_progress(100)
   nav.set_section('section_download')
   forms_assembling
+  snapshot_forms
   get_docs_screen
 ---
+code: |
+  stuff_to_snapshot = {
+  	'start_time': str(current_datetime().format_datetime()),
+  	'started_interview': True, 
+  	}
+
+  try:
+    stuff_to_snapshot['ip_address'] = device(ip=True)
+  except:
+    pass
+
+  stuff_to_snapshot['zip'] = showifdef('users[0].address.zip')
+
+  if showifdef('parenting_holiday'):
+    if parenting_holiday == "holiday_option1":
+      stuff_to_snapshot['holiday_groups'] = True
+    else:
+      stuff_to_snapshot['holiday_separate'] = True
+  
+  stuff_to_snapshot['downloaded_forms'] = showifdef('forms_assembling')
+  
+  store_variables_snapshot(
+  	data=stuff_to_snapshot, persistent=True
+  	)
+  snapshot_interview_state = True
+---
+code: |
+  snapshot_interview_state
+  snapshot_start = True  
+---
+code: |
+  reconsider('snapshot_interview_state')
+  snapshot_forms = True
+---
+
 id: welcome
 continue button field: sees_nav_bar
 question: |
@@ -210,9 +247,14 @@ continue button field: about_parenting_plans
 question: |
   About Parenting Plans
 subquestion: |
-  A ${form_name} lists who is responsible for decision-making for the children and includes a schedule for when the children are with you and when they are with the other parent.
+  A ${form_name} lists who is responsible for decision-making for the children. It includes a schedule for when the children are with you and when they are with the other parent.
   
-  The law requires that you file a suggested ${form_name} within 120 days of the date a divorce or parental responsibilities petition is filed or the date the other parent was notified. It can be your own Parenting Plan or one that you and the other parent agree on.
+  The law requires that you file a suggested ${form_name} within 120 days of:
+  
+  * The date a divorce or parental responsibilities petition is filed, or
+  * The date the other parent was notified.
+  
+  You can file your own Parenting Plan or one that you and the other parent agree on.
 
   **Note:** You do not have to file a Parenting Plan if the other parent does not file an Appearance or an Answer or Response after they are notified. A judge may not require a Parenting Plan to be filed, so ask the judge during your first court date whether they want you to file one. 
   
@@ -532,7 +574,7 @@ sets:
 question: |
   When is ${children[i].name.full(middle="full")}'s birth date?
 subquestion: |
-  Only children under 18 can be included in a ${form_name}.
+  Only children under 18 can be included in a ${form_name}. If ${children[i].name.full(middle='full')} is 18 or older, you should click **< Back** twice and not add them to the Parenting Plan.
 fields:
   - Birth date: children[i].birthdate
     datatype: BirthDate
@@ -1123,7 +1165,7 @@ id: individual holidays
 question: |
   Individual holidays
 subquestion: |
-  For each holiday, you can select which parent will have the children on which 
+  For each holiday, you will be able to select which parent will have the children on which 
   years. You can also choose a start and end time.
 
   If the holiday is not listed, you can add up to five others on a different screen.
@@ -1131,6 +1173,7 @@ fields:
   - "Which holidays do you want to include in the parenting time schedule?": holiday_list
     datatype: checkboxes
     none of the above: False
+    all of the above: True
     choices:
       code: | 
         holidays
@@ -1170,6 +1213,8 @@ id: holiday list member details
 generic object: Thing
 question: |
   What parenting time schedule do you want for ${ get_holiday_name(x) }?
+subquestion: |
+  If you neeed to add other details about holidays, you can explain more when we ask if you want to "add more parenting time information" on another screen.
 fields:
   - no label: x.holiday_year
     datatype: radio
@@ -1288,6 +1333,8 @@ fields:
           Spring break starts at 9am the day after school dismissal and ends at 5pm the 
           day before school starts again.
       - Other: other
+        help: |
+          Choose this if you want one parent to have parenting time the entire spring break every year. Be sure to explain this below.
   - Which parent will have the even-numbered years?: spring_break_year
     datatype: radio
     choices:
@@ -1324,7 +1371,11 @@ fields:
     choices:
       - No summer break schedule (follow the regular parenting schedule): no
       - Each parent will have 2 non-consecutive weeks in the summer: split
+        help: |
+          Each parent will notify the other in writing by April 1st each year of the weeks they wish to have summer parenting time.
       - Other: other
+        help: |
+          Choose this if you want one parent to have parenting time the entire summer break every year. Be sure to explain this below.
   - note: |
       Each parent will notify the other in writing by April 1st each year 
       of the weeks they wish to have summer parenting time. 
@@ -1370,11 +1421,15 @@ fields:
     choices:
       - No winter break schedule (follow the regular parenting schedule): no
       - Alternate winter break on even and odd years: split
+        help: |
+          School winter break begins at 9am the day after school dismissal and ends at 5 pm the day before school starts again.
       - Other: other
+        help: |
+          Choose this if you want one parent to have parenting time the entire winter break every year. Be sure to explain this below.
   - note: |
       One parent will have the first half of winter break in even-numbered years 
       and the other parent will have the first half of winter break in odd-numbered
-      years. School Winter Break begins at 9am the day after school dismissal and 
+      years. School winter break begins at 9am the day after school dismissal and 
       ends at 5 pm the day before school starts again.
     show if:
       variable: winter_break
@@ -4392,8 +4447,8 @@ attachment:
           % endif
       - "additional_parenting_time": ${ additional_time or week.number_gathered() >= 3 }
       # 10. FIRST REFUSAL FOR CHILDCARE 
-      - "refusal_no": ${ first_refusal }
-      - "refusal_yes": ${ not first_refusal }
+      - "refusal_no": ${ not first_refusal }
+      - "refusal_yes": ${ first_refusal }
       # 11. COMMUNICATION 
       - "anytime": ${ communication == "anytime" }
       - "daily": ${ communication == "daily" }
