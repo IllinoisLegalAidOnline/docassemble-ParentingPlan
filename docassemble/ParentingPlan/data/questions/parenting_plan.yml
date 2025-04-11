@@ -10,6 +10,7 @@ include:
   - docassemble.AssemblyLine:assembly_line.yml
   - docassemble.ILAO:ilao-interview-framework.yml
   - docassemble.ILAO:shared-basic-questions.yml
+  - parenting_plan_review.yml
 ---
 objects:
   - users: ALPeopleList.using(object_type=ALIndividual, there_are_any=True)
@@ -228,7 +229,7 @@ subquestion: |
 
   * How you want to split parental responsibilities (formerly custody),
   * How you want to split parenting time (formerly visitation), and
-  * Information about your family law court case such as case number and county.
+  * Information about your divorce or allocation of parental responsibilities court case such as case number and county.
 
   It could take 20 minutes to 40 minutes to finish this program. You can log in and save your work to return to later. 
  
@@ -252,7 +253,7 @@ subquestion: |
   The law requires that you file a suggested ${form_name} within 120 days of:
   
   * The date a divorce or parental responsibilities petition is filed, or
-  * The date the other parent was notified.
+  * The date the other parent was notified that a divorce or parental responsibilities petition was filed.
   
   You can file your own Parenting Plan or one that you and the other parent agree on.
 
@@ -262,7 +263,7 @@ subquestion: |
 ---
 id: family case 
 question: |
-  Do you have a family law case in Illinois?
+  Do you have a divorce or allocation of parental responsibilities case in Illinois?
 subquestion: |
   If you are about to file a new divorce or allocation of parental responsibilities case in Illinois, select **Yes**.
 fields:
@@ -274,7 +275,7 @@ event: family_kickout
 question: |
   Sorry
 subquestion: |
-  You can only use this program if you have a family law case in Illinois or if you are planning to start one.
+  You can only use this program if you have a divorce or allocation of parental responsibilities case in Illinois or if you are planning to start one.
 
   Use **[Get Legal Help](https://www.illinoislegalaid.org/get-legal-help)** to find free or low-cost legal services in your area.
 buttons:
@@ -786,7 +787,7 @@ fields:
       is: no_mediation
 ---
 ########################## PARENTING TIME ######################
-id: parenting time
+id: weekly parenting time
 question: |
   Weekly parenting time
 subquestion: |
@@ -794,6 +795,8 @@ subquestion: |
   will have the children. The form breaks down the time on an hour-by-hour basis. 
   The forms allow for up to four different weekly schedules.
 
+  ${ collapse_template(weekly_pt_schedule_example) }  
+  
   If you want different parenting time schedules on different weeks, select **Yes**. 
   You can enter up to four weekly parenting time schedules. 
 
@@ -801,11 +804,19 @@ subquestion: |
   breaks on other screens. The weekly schedule covers non-holidays and weeks when 
   school is in session.
 fields:
-  - Do you want to fill in the parenting time schedule now?: parenting_time
+  - Do you want to fill in the weekly parenting time schedule now?: parenting_time
     datatype: radio
     choices:
       - Yes, I will enter the days and times for each parent on the next screens.: yes
       - No, I will decide weekly parenting time later. I will fill out the schedule by hand or attach one to the *${form_name}*.: no
+---
+template: weekly_pt_schedule_example
+subject: |
+  **Show me the weekly parenting time schedule**
+content: |  
+  This is how the weekly parenting time schedule appears on the form.
+
+  [FILE weekly_parenting_time_schedule_example.png, 100%, Weekly parenting time schedule section of forms]
 ---
 id: parent initials
 question: |
@@ -1060,6 +1071,8 @@ fields:
     datatype: radio
     choices: 
       - Holidays are put into two groups.: holiday_option1
+        help: |
+          Each group contains 3 set holidays plus up to 5 other holidays you can choose. **Group A Holidays** include Thanksgiving Day, Christmas Eve, and New Year's Eve. **Group B Holidays** include the 4th of July, Labor Day, and Christmas Day. 
       - Each holiday is handled separately.: holiday_option2
       - I will decide holiday parenting time later. This means I will fill out the schedule by hand or attach one to the *${form_name}*.: other
 ---
@@ -1631,7 +1644,7 @@ subquestion: |
   other parent. The notice must:
 
   * Be given at least 60 days before the move unless that is impossible. If impossible,
-  the notice must be given at the  earliest date possible, 
+  the notice must be given at the earliest date possible, 
   
   * State the date the parent plans to move,
   
@@ -1693,7 +1706,7 @@ subquestion: |
 
   * File the signed notice with the court, and
 
-  * Follow the Handling Conflicts process set out below to try to reach an agreement with the
+  * Follow the Handling Conflicts process in the *${form_name}* to try to reach an agreement with the
       other parent about changes to the parenting time schedule.
       
   If no agreement can be reached after completing the Handling Conflicts process, file a petition to modify the parenting time schedule with the court.
@@ -1716,7 +1729,7 @@ question: |
 subquestion: |
   If the other parent does not agree with the move, the parent relocating must: 
 
-  * Follow the Handling Conflicts process set out below to try to reach an agreement
+  * Follow the Handling Conflicts process in the *${form_name}* to try to reach an agreement
   with the other parent, and
 
   * If no agreement can be reached after completing the Handling Conflicts process, 
@@ -1767,7 +1780,7 @@ question: |
 subquestion: |
   If the parents do not agree, then they will:
 
-  * Follow the Handling Conflicts (Mediation) section in the *${form_name}* to try to reach an agreement about changes to the *${form_name}*. If an agreement is reached, follow the steps in the Handling Conflicts (Mediation) section.
+  * Follow the Handling Conflicts process in the *${form_name}* to try to reach an agreement about changes to the *${form_name}*. If an agreement is reached, follow the steps in the Handling Conflicts section of the *${form_name}*.
 
   * If the parents still don't agree after going through the Handling Conflicts process,
   the parent who wants the change must file a petition with the court asking for 
@@ -1787,602 +1800,6 @@ fields:
       minlength: |
         You cannot continue unless you have read and understand the above information.
 continue button field: terms_accept_changes_b
----
-#################### REVIEW SCREEN #########################
-id: review screen
-event: review_answers
-question: |
-  Review screen
-subquestion: |
-  Edit your answers below.
-review: 
-  - note: |
-      <h4>Case info</h4>
-  - Edit: plan_type
-    button: |
-      **Whose Parenting Plan is this?**
-      % if plan_type == "petitioner":
-      Mine
-      % elif plan_type == "respondent":
-      The other parent's
-      % elif plan_type == "both":
-      An agreed Parenting Plan
-      % else:
-      Unsure
-      % endif
-  - Edit: case_county
-    button: |
-      **County where this case is filed:**
-      ${ case_county }
-  - Edit: case_number
-    button: |
-      **Case number:**
-      % if case_number == "":
-      None entered
-      % else:
-      ${ case_number }
-      % endif
-  - note: |
-      <h4>Family members</h4>
-  - Edit: users[0].name.first
-    button: |
-      **Your name:**
-      ${ users[0].name.full(middle="full") }
-  - Edit: hide_contact
-    button: |
-      **Do you want to hide your address?**
-      ${ word(yesno(hide_contact))}  
-  - Edit: users[0].address.address
-    button: |
-      **Your address:**
-      ${ users[0].address.on_one_line(bare=True) }
-    show if: hide_contact == False
-  - Edit: users[0].phone_number
-    button: |
-      **Your phone number:**
-      % if users[0].phone_number == "":
-      No phone number entered
-      % else:
-      ${ phone_number_formatted(users[0].phone_number) }
-      % endif
-
-      **Your email address:**
-      % if users[0].email == "":
-      No email address entered
-      % else:
-      ${ users[0].email }
-      % endif
-  - Edit: has_employer
-    button: |
-      **Do you have a job?**
-      ${word(yesno(has_employer))}
-  - Edit: employer.name.first
-    button: |
-      **Employer name:**
-      ${ employer.name.full(middle="full") }
-      
-      **Employer address:**
-      ${ employer.address.on_one_line(bare=True) }
-      
-      **Employer phone:**
-      ${ phone_number_formatted(employer.phone_number) }
-    show if: has_employer
-  - Edit: other_parties[0].name.first
-    button: |
-      **Other parent's name:**
-      ${ other_parties[0].name.full(middle="full") }
-  - Edit: has_other_address
-    button: |
-      **Is ${ other_parties[0].name.full(middle="full") }'s address listed on other court forms?**
-      ${ word(yesno(has_other_address))}  
-  - Edit: other_parties[0].address.address
-    button: |
-      **Other parent's address:**
-      ${ other_parties[0].address.on_one_line(bare=True) }
-    show if: has_other_address
-  - Edit: other_parties[0].phone_number
-    button: |
-      **Other parent's phone number:**
-      % if other_parties[0].phone_number == "":
-      None entered
-      % else:
-      ${ phone_number_formatted(other_parties[0].phone_number) }
-      % endif
-
-      **Other parent's email address:**
-      % if other_parties[0].email == "":
-      No email address
-      % else:
-      ${ other_parties[0].email }
-      % endif
-  - Edit: has_other_employer
-    button: |
-      **Does ${ other_parties[0].name.full(middle="full") } have a job?**
-      ${word(yesno(has_other_employer))}
-  - Edit: other_employer.name.first
-    button: |
-      **Employer name:**
-      ${ other_employer.name.full(middle="full") }
-      
-      **Employer address:**
-      ${ other_employer.address.on_one_line(bare=True) }
-      
-      **Employer phone:**
-      ${ phone_number_formatted(other_employer.phone_number) }
-    show if: has_other_employer
-  - Edit: children.revisit
-    button: |
-      **Children and ages**
-
-      % for child in children:
-        * ${ child.name.full() }, ${ child.age_in_years() if child.age_in_years() > 1 else str(child.age_in_months()) + ' months' }
-      % endfor
-  - note: |
-      <h4>Decision making</h4>
-  - Edit: eduction_decisions
-    button: |
-      **Education decisions will be made by:**
-
-      % if eduction_decisions == "me":
-      ${ users[0].name.full(middle="full") }
-      % elif eduction_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
-      % elif eduction_decisions == "both":
-      Both parents
-      % endif
-  - Edit: health_decisions
-    button: |
-      **Healthcare decisions will be made by:**
-
-      % if health_decisions == "me":
-      ${ users[0].name.full(middle="full") }
-      % elif health_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
-      % elif health_decisions == "both":
-      Both parents
-      % endif
-  - Edit: religious_decisions
-    button: |
-      **Religious decisions will be made by:**
-
-      % if religious_decisions == "me":
-      ${ users[0].name.full(middle="full") }
-      % elif religious_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
-      % elif religious_decisions == "both":
-      Both parents
-      % endif
-  - Edit: activities_decisions
-    button: |
-      **Activity decisions will be made by:**
-
-      % if activities_decisions == "me":
-      ${ users[0].name.full(middle="full") }
-      % elif activities_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
-      % elif activities_decisions == "both":
-      Both parents
-      % endif
-      
-  - note: |
-      <h4>Parenting Time</h4>
-  - Edit: parenting_time
-    button: |
-      **Include a parenting time weekly schedule?**
-      ${ capitalize(parenting_time) }
-
-  - Edit: users[0].name.initials
-    button: |
-      **Initials for each parent:**
-
-      * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
-      * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
-    show if: parenting_time == "yes" or parenting_holiday != "other" or school_breaks
-  - Edit: schedule_start
-    button: |
-      **Weekly schedule will start on:** ${ format_date(schedule_start, "MMMM d, YYYY") }
-    show if: parenting_time == "yes"
-  - Edit: week.revisit
-    button: |
-      **Use the Edit button to review the weekly schedule.**
-    show if: parenting_time == "yes"
-  - Edit: parenting_holiday
-    button: |
-      **Parenting time during holidays:**
-
-      % if parenting_holiday == "holiday_option1":
-      * Holidays are put into two groups
-      % elif parenting_holiday == "holiday_option2":
-      * Each holiday is handled separately
-      % elif parenting_holiday == "other":
-      * I will decide holiday parenting time later.
-      % endif
-  - Edit: holiday_groups
-    button: |
-      **Holidays by group are as follows:**
-
-      Holiday | Group A | Group B
-      ---- | ----- | -----
-      Required | Thanksgiving Day | 4th of July
-      Required | Christmas Eve | Labor Day
-      Required | New Year's Eve | Christmas Day
-      % if (showifdef('other_a1_yes') and other_a1_yes) or (showifdef('other_b1_yes') and other_b1_yes):
-      First Additonal | ${ other_a1 if showifdef('other_a1_yes') and other_a1_yes else '' } | ${ other_b1 if showifdef('other_b1_yes') and other_b1_yes else '' }
-      % endif
-      % if (showifdef('other_a2_yes') and other_a2_yes) or (showifdef('other_b2_yes') and other_b2_yes):
-      Second Additonal | ${ other_a2 if showifdef('other_a2_yes') and other_a2_yes else '' } | ${ other_b2 if showifdef('other_b2_yes') and other_b2_yes else '' }
-      % endif
-      % if (showifdef('other_a3_yes') and other_a3_yes) or (showifdef('other_b3_yes') and other_b3_yes):
-      Third Additonal | ${ other_a3 if showifdef('other_a3_yes') and other_a3_yes else '' } | ${ other_b3 if showifdef('other_b3_yes') and other_b3_yes else '' }
-      % endif
-      % if (showifdef('other_a4_yes') and other_a4_yes) or (showifdef('other_b4_yes') and other_b4_yes):
-      Fourth Additonal | ${ other_a4 if showifdef('other_a4_yes') and other_a4_yes else '' } | ${ other_b4 if showifdef('other_b4_yes') and other_b4_yes else '' }
-      % endif
-      % if (showifdef('other_a5_yes') and other_a5_yes) or (showifdef('other_b5_yes') and other_b5_yes):
-      Fifth Additonal | ${ other_a5 if showifdef('other_a5_yes') and other_a5_yes else '' }| ${ other_b5 if showifdef('other_b5_yes') and other_b5_yes else '' }
-      % endif
-    show if: parenting_holiday == "holiday_option1"
-  - Edit: holiday_list
-    button: |
-      **Which common holidays do you want to include?**
-
-      % if holiday_list.any_true():
-      % for holiday in holiday_list.true_values():
-      * ${ holiday }
-      % endfor
-      % else:
-      None selected
-      % endif
-    show if: parenting_holiday == "holiday_option2"
-  - Edit: holiday_list.revisit
-    button: |
-      **Use the Edit button to review the common holidays.**
-    show if: parenting_holiday == "holiday_option2"
-  - Edit: other_holidays.there_are_any
-    button: |
-      **Do you have additional holidays you want to include?**
-      ${word(yesno(other_holidays.there_are_any))}      
-    show if: parenting_holiday == "holiday_option2"
-  - Edit: other_holidays.revisit
-    button: |
-      **Addtitional holidays to include:**
-      
-      % for holiday in other_holidays:
-      * ${ holiday.name.text }
-      % endfor
-    show if: parenting_holiday == "holiday_option2" and other_holidays.there_are_any
-  - Edit: school_breaks
-    button: |
-      **Do you want to include a parenting time schedule during school breaks?**
-      ${ word(yesno(school_breaks)) }
-  - Edit: spring_break
-    button: |
-      **What parenting time schedule do you want for spring break?**
-
-      % if spring_break == "no":
-      * No spring break schedule
-      % elif spring_break == "split":
-      * Alternate spring break on even and odd years
-
-        % if spring_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have the even-numbered years.
-        % else:
-          ${ other_parties[0].name.full(middle="full") } will have the even-numbered years.
-        % endif
-        
-        % if spring_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have the odd-numbered years.
-        % else:
-          ${ other_parties[0].name.full(middle="full") } will have the odd-numbered years.
-        % endif
-      % elif spring_break == "other":
-      * Other: ${ spring_break_other }
-
-      Start day and time: ${ spring_break_start }
-
-      Start day and time: ${ spring_break_end }
-      % endif
-    show if: school_breaks
-  - Edit: summer_break
-    button: |
-      **What parenting time schedule do you want for summer break?**
-
-      % if summer_break == "no":
-      * No summer break schedule
-      % elif summer_break == "split":
-      * Each parent will have 2 non-consecutive weeks in the summer
-
-        % if summer_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first choice of dates in even-numbered years.
-        % else:
-          ${ other_parties[0].name.full(middle="full") } will have first choice of dates in even-numbered years.
-        % endif
-        
-        % if summer_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first choice of dates in odd-numbered years.
-        % else:
-          ${ other_parties[0].name.full(middle="full") } will have first choice of dates in odd-numbered years.
-        % endif
-
-      % elif summer_break == "other":
-      * Other: ${ summer_break_other }
-
-      Start day and time: ${ summer_break_start }
-
-      Start day and time: ${ summer_break_end }
-      % endif
-    show if: school_breaks
-  - Edit: winter_break
-    button: |
-      **What parenting time schedule do you want for winter break?**
-
-      % if winter_break == "no":
-      * No winter break schedule
-      % elif winter_break == "split":
-      * Alternate winter break on even and odd years
-
-        % if winter_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first half of winter break in even-numbered years.
-        % else:
-          ${ other_parties[0].name.full(middle="full") } will have first half of winter break in even-numbered years.
-        % endif
-        
-        % if winter_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first half of winter break in odd-numbered years.
-        % else:
-          ${ other_parties[0].name.full(middle="full") } will have first half of winter break in odd-numbered years.
-        % endif
-
-      % elif winter_break == "other":
-      * Other: ${ winter_break_other }
-
-      Start day and time: ${ winter_break_start }
-
-      Start day and time: ${ winter_break_end }
-      % endif
-    show if: school_breaks
-  - Edit: transportation
-    button: |
-      **Parenting time transportation of children:**
-
-      % if transportation == "me":
-      ${ users[0].name.full(middle="full") } will provide all transportation.
-      % elif transportation == "them":
-      ${ other_parties[0].name.full(middle="full") } will provide all transportation.
-      % elif transportation == "pick_up":
-      Each parent will pick up the children at the start of their parenting time.
-      % elif transportation == "drop_off":
-      Each parent will drop off the children at the end of their parenting time.
-      % elif transportation == "other":
-      ${ transportation_other } 
-      % endif
-  - Edit: exchange_location
-    button: |
-      **Exchange of children will take place at:**
-
-      % if exchange_location == "homes":
-      * Drop off and pick up of the children be at each parent's homes unless both parties in advance to a different meeting place.
-      % elif exchange_location == "location":
-      Drop off and pick up will take place at:
-      
-      ${ exchange_address.location }, ${ exchange_address.address.on_one_line(bare=True) }
-      % endif
-  - Edit: first_refusal
-    button: |
-      **Does each parent have the right of first refusal for childcare?**
-      ${word(yesno(first_refusal))}
-  - Edit: communication
-    button: |
-      **When can children communicate with the other parent?**
-
-      % if communication == "anytime":
-      Anytime
-      % elif communication == "daily":
-      Daily
-
-      **Start**:
-      ${ format_time(daily_start, 'hh:mm a') }
-      **End**:
-      ${ format_time(daily_end, 'hh:mm a') }
-      % elif communication == "other":
-      Other: 
-      ${ other_description }
-      % endif
-  - Edit: additional_time
-    button: |
-      **Do you want to add more parenting time information?**
-      ${word(yesno(additional_time))}
-  - Edit: additional_time_details
-    button: |
-      **Additional parenting time information:**
-
-      ${ additional_time_details }
-    show if: additional_time
-
-  - note: |
-      <h4>Other Parenting Plan terms</h4>  
-  - Edit: primary_parent
-    button: |
-      **Parent with the majority of parenting time:**
-
-      % if primary_parent == "me":
-      ${ users[0].name.full(middle="full") }
-      % elif primary_parent == "them":
-      ${ other_parties[0].name.full(middle="full") }
-      % endif
-  - Edit: residential_address
-    button: |
-      **Children's residential address:**
-
-      % if residential_address == "me":
-      Home of ${ users[0].name.full(middle="full") }
-      % elif residential_address == "them":
-      Home of ${ other_parties[0].name.full(middle="full") }
-      % endif
-  - Edit: mediation_option
-    button: |
-      **Mediation is required on all issues?**
-      ${word(yesno( mediation_option == "mediation" ))}
-
-      % if mediation_option == "no_mediation":
-      Mediation is not required on all issues because:
-      
-      % if mediation_reason['parent']:
-      * One parent has all significant decision-making responsibility.
-      % endif
-      % if mediation_reason['history']:
-      * There is a history of domestic violence between the parties.
-      % endif
-      % if mediation_reason['history']:
-      * Other reason: ${ other_reasons } 
-      % endif
-      % endif
-
-    
----
-################ REVISIT TABLES ###################
-id: children table
-table: children.table
-rows: children
-columns:
-  - Child name: |
-      row_item.name.full()
-  - Age: |
-      row_item.age_in_years() if row_item.age_in_years() > 1 else str(row_item.age_in_months()) + ' months'
-  - Edit name: |
-      action_button_html(url_action(row_item.attr_name("name.first")), label="Edit", icon="pencil-alt")
-  - Edit age: |  
-      action_button_html(url_action(row_item.attr_name("birthdate")), label="Edit", icon="pencil-alt")
-delete buttons: True
-confirm: True
----
-id: children review screen
-continue button field: children.revisit
-question: |
-  Edit information about your children
-subquestion: |
-  ${ children.table }
-
-  % if children.number_gathered() < 10:
-  ${ children.add_action() }
-  % endif
----
-id: week table
-table: week.table
-rows: week
-columns:
-  - Week: |
-      row_item.name
-delete buttons: True
-confirm: True
----
-id: week review screen
-continue button field: week.revisit
-question: |
-  Reviewing weekly parenting time
-subquestion: |
-  
-  % for cnt, current_week in enumerate(week):
-    ${ current_week.name} | Mon | Tue | Wed | Thur | Fri | Sat | Sun
-    -------|-----|-----|-----|-----|-----|-----|-----
-    8am | ${ current_week.day[0].time_8_am.name.initials } | ${ current_week.day[1].time_8_am.name.initials } | ${ current_week.day[2].time_8_am.name.initials } | ${ current_week.day[3].time_8_am.name.initials } | ${ current_week.day[4].time_8_am.name.initials } | ${ current_week.day[5].time_8_am.name.initials } | ${ current_week.day[6].time_8_am.name.initials } |
-    9am | ${ current_week.day[0].time_9_am.name.initials } | ${ current_week.day[1].time_9_am.name.initials } | ${ current_week.day[2].time_9_am.name.initials } | ${ current_week.day[3].time_9_am.name.initials } | ${ current_week.day[4].time_9_am.name.initials } | ${ current_week.day[5].time_9_am.name.initials } | ${ current_week.day[6].time_9_am.name.initials } |
-    10am | ${ current_week.day[0].time_10_am.name.initials } | ${ current_week.day[1].time_10_am.name.initials } | ${ current_week.day[2].time_10_am.name.initials } | ${ current_week.day[3].time_10_am.name.initials } | ${ current_week.day[4].time_10_am.name.initials } | ${ current_week.day[5].time_10_am.name.initials } | ${ current_week.day[6].time_10_am.name.initials } |
-    11am | ${ current_week.day[0].time_11_am.name.initials } | ${ current_week.day[1].time_11_am.name.initials } | ${ current_week.day[2].time_11_am.name.initials } | ${ current_week.day[3].time_11_am.name.initials } | ${ current_week.day[4].time_11_am.name.initials } | ${ current_week.day[5].time_11_am.name.initials } | ${ current_week.day[6].time_11_am.name.initials } |
-    Noon | ${ current_week.day[0].time_noon.name.initials } | ${ current_week.day[1].time_noon.name.initials } | ${ current_week.day[2].time_noon.name.initials } | ${ current_week.day[3].time_noon.name.initials } | ${ current_week.day[4].time_noon.name.initials } | ${ current_week.day[5].time_noon.name.initials } | ${ current_week.day[6].time_noon.name.initials } |
-    1pm | ${ current_week.day[0].time_1_pm.name.initials } | ${ current_week.day[1].time_1_pm.name.initials } | ${ current_week.day[2].time_1_pm.name.initials } | ${ current_week.day[3].time_1_pm.name.initials } | ${ current_week.day[4].time_1_pm.name.initials } | ${ current_week.day[5].time_1_pm.name.initials } | ${ current_week.day[6].time_1_pm.name.initials } |    
-    2pm | ${ current_week.day[0].time_2_pm.name.initials } | ${ current_week.day[1].time_2_pm.name.initials } | ${ current_week.day[2].time_2_pm.name.initials } | ${ current_week.day[3].time_2_pm.name.initials } | ${ current_week.day[4].time_2_pm.name.initials } | ${ current_week.day[5].time_2_pm.name.initials } | ${ current_week.day[6].time_2_pm.name.initials } |
-    3pm | ${ current_week.day[0].time_3_pm.name.initials } | ${ current_week.day[1].time_3_pm.name.initials } | ${ current_week.day[2].time_3_pm.name.initials } | ${ current_week.day[3].time_3_pm.name.initials } | ${ current_week.day[4].time_3_pm.name.initials } | ${ current_week.day[5].time_3_pm.name.initials } | ${ current_week.day[6].time_3_pm.name.initials } |
-    4pm | ${ current_week.day[0].time_4_pm.name.initials } | ${ current_week.day[1].time_4_pm.name.initials } | ${ current_week.day[2].time_4_pm.name.initials } | ${ current_week.day[3].time_4_pm.name.initials } | ${ current_week.day[4].time_4_pm.name.initials } | ${ current_week.day[5].time_4_pm.name.initials } | ${ current_week.day[6].time_4_pm.name.initials } |
-    5pm | ${ current_week.day[0].time_5_pm.name.initials } | ${ current_week.day[1].time_5_pm.name.initials } | ${ current_week.day[2].time_5_pm.name.initials } | ${ current_week.day[3].time_5_pm.name.initials } | ${ current_week.day[4].time_5_pm.name.initials } | ${ current_week.day[5].time_5_pm.name.initials } | ${ current_week.day[6].time_5_pm.name.initials } |
-    6pm | ${ current_week.day[0].time_6_pm.name.initials } | ${ current_week.day[1].time_6_pm.name.initials } | ${ current_week.day[2].time_6_pm.name.initials } | ${ current_week.day[3].time_6_pm.name.initials } | ${ current_week.day[4].time_6_pm.name.initials } | ${ current_week.day[5].time_6_pm.name.initials } | ${ current_week.day[6].time_6_pm.name.initials } |
-    7pm | ${ current_week.day[0].time_7_pm.name.initials } | ${ current_week.day[1].time_7_pm.name.initials } | ${ current_week.day[2].time_7_pm.name.initials } | ${ current_week.day[3].time_7_pm.name.initials } | ${ current_week.day[4].time_7_pm.name.initials } | ${ current_week.day[5].time_7_pm.name.initials } | ${ current_week.day[6].time_7_pm.name.initials } |
-    8pm | ${ current_week.day[0].time_8_pm.name.initials } | ${ current_week.day[1].time_8_pm.name.initials } | ${ current_week.day[2].time_8_pm.name.initials } | ${ current_week.day[3].time_8_pm.name.initials } | ${ current_week.day[4].time_8_pm.name.initials } | ${ current_week.day[5].time_8_pm.name.initials } | ${ current_week.day[6].time_8_pm.name.initials } |
-    9pm<BR>Over | ${ current_week.day[0].time_9_pm.name.initials } | ${ current_week.day[1].time_9_pm.name.initials } | ${ current_week.day[2].time_9_pm.name.initials } | ${ current_week.day[3].time_9_pm.name.initials } | ${ current_week.day[4].time_9_pm.name.initials } | ${ current_week.day[5].time_9_pm.name.initials } | ${ current_week.day[6].time_9_pm.name.initials } |
-    ${ current_week.name} | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
-
-  % endfor
-  % if week.number_gathered() < 4:
-  ${ week.add_action() }
-  % endif
-
-  If you need to delete a week from the schedule:
-  ${ week.table }
-css: |
-  <style>
-    .table-responsive:not(:first-child) {
-      margin-top: 5em;
-    }
-    .table-responsive:last-child {
-      margin-top: 1em;
-    }
-  </style>
----
-id: holidays review screen
-continue button field: holiday_list.revisit
-question: |
-  Reviewing holiday schedules
-subquestion: |
-  Holiday | Edit 
-  -------- | -----
-  % if holiday_list[get_holiday_name(new_years_day)]:
-  ${get_holiday_name(new_years_day)} | ${ action_button_html(url_action('new_years_day.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  %if holiday_list[get_holiday_name(mothers_day)]:
-    ${get_holiday_name(mothers_day)} | ${ action_button_html(url_action('mothers_day.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(memorial_day)]:
-    ${get_holiday_name(memorial_day)} | ${ action_button_html(url_action('memorial_day.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(fathers_day)]:
-    ${get_holiday_name(fathers_day)} | ${ action_button_html(url_action('fathers_day.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(july_4th)]:
-    ${get_holiday_name(july_4th)} | ${ action_button_html(url_action('july_4th.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(labor_day)]:
-    ${get_holiday_name(labor_day)} | ${ action_button_html(url_action('labor_day.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(halloween)]:
-    ${get_holiday_name(halloween)} | ${ action_button_html(url_action('halloween.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(thanksgiving)]:
-    ${get_holiday_name(thanksgiving)} | ${ action_button_html(url_action('thanksgiving.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(christmas_eve)]:
-    ${get_holiday_name(christmas_eve)} | ${ action_button_html(url_action('christmas_eve.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(christmas_day)]:
-    ${get_holiday_name(christmas_day)} | ${ action_button_html(url_action('christmas_day.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-  % if holiday_list[get_holiday_name(new_years_eve)]:
-    ${get_holiday_name(new_years_eve)} | ${ action_button_html(url_action('new_years_eve.holiday_year'), label="Edit", icon="pencil-alt") }
-  % endif
-
----
-id: additional holidays table
-table: other_holidays.table
-rows: other_holidays
-columns:
-  - Additonal holiday: |
-      row_item.name
-  - Edit details: |
-      action_button_html(url_action(row_item.attr_name("holiday_year")), label="Edit", icon="pencil-alt")
-delete buttons: True
-confirm: True
----
-id: additional holidays review screen
-continue button field: other_holidays.revisit
-question: |
-  Reviewing additional holidays
-subquestion: |
-    ${ other_holidays.table }
-
-    % if other_holidays.number_gathered() < 5:
-    **Note:** You can add up to five additional holidays.
-
-    ${ other_holidays.add_action() }
-    % endif
 ---
 ###################### DOWNLOAD SECTION #########################
 id: forms assembling
