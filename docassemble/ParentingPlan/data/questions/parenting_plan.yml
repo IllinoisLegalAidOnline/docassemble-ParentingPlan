@@ -1,6 +1,6 @@
 metadata:
-  title: Parenting plan
-  short title: Parenting plan
+  title: Parenting Plan
+  short title: Parenting Plan
   comment: This program helps you create a plan to set parental responsibilities (formerly custody) and parenting time (formerly visitation).
   authors:
     - Jim Graszer
@@ -211,9 +211,9 @@ code: |
 id: welcome
 continue button field: sees_nav_bar
 question: |
-  Parenting plan
+  Parenting Plan
 subquestion: |
-  Welcome to Illinois Legal Aid Online's **Parenting plan** Easy Form.
+  Welcome to Illinois Legal Aid Online's **Parenting Plan** Easy Form.
 
   This program helps you make a plan to set parental responsibilities (formerly custody) and parenting time (formerly visitation).
 
@@ -287,7 +287,7 @@ id: parenting plan type
 question: |
   Whose Parenting Plan is this?
 fields:
-  - Parenting plan: plan_type
+  - Parenting Plan: plan_type
     datatype: radio 
     choices: 
       - Mine: petitioner
@@ -1845,7 +1845,7 @@ id: holiday list member details
 generic object: ALDocumentBundle
 template: x.send_email_template
 subject: |
-  Parenting plan forms
+  Parenting Plan forms
 content: |
   Your forms are attached.
   
