@@ -194,7 +194,12 @@ code: |
   
   stuff_to_snapshot['downloaded_forms'] = showifdef('forms_assembling')
   
-  store_variables_snapshot(
+  try:
+    stuff_to_snapshot['session_id'] = current_context().session
+  except:
+    pass
+  
+    store_variables_snapshot(
   	data=stuff_to_snapshot, persistent=True
   	)
   snapshot_interview_state = True
@@ -215,7 +220,7 @@ question: |
 subquestion: |
   Welcome to Illinois Legal Aid Online's **Parenting Plan** Easy Form.
 
-  This program helps you make a plan to set parental responsibilities (formerly custody) and parenting time (formerly visitation).
+  This program helps you make a plan to set parental responsibilities (formerly "custody") and parenting time (formerly "visitation").
 
   To learn more, read ILAO's article, [**Parenting plan for parental responsibilities**](https://www.illinoislegalaid.org/node/29851).
 
@@ -227,8 +232,8 @@ question: |
 subquestion: |
   To complete this program, you will need to know:
 
-  * How you want to split parental responsibilities (formerly custody),
-  * How you want to split parenting time (formerly visitation), and
+  * How you want to split parental responsibilities (formerly "custody"),
+  * How you want to split parenting time (formerly "visitation"), and
   * Information about your divorce or allocation of parental responsibilities court case such as case number and county.
 
   It could take 20 minutes to 40 minutes to finish this program. You can log in and save your work to return to later. 
