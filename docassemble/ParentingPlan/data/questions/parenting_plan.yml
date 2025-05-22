@@ -128,6 +128,8 @@ code: |
     users[0].name.initials
     schedule_start
     week.gather()
+    if week.number_gathered() == 4:
+      four_week_review
 
   if parenting_holiday != "other":
     users[0].name.initials
@@ -156,6 +158,7 @@ code: |
   nav.set_section('section_terms')
   primary_parent
   residential_address
+  additional_terms_intro
   accept_rights
   accept_move
   accept_relocation_a
@@ -295,8 +298,8 @@ fields:
   - Parenting Plan: plan_type
     datatype: radio 
     choices: 
-      - Mine: petitioner
-      - The other parent's: respondent
+      - Mine: mine
+      - The other parent's: other_parent
       - An agreed Parenting Plan: both
       - Unsure: unsure
 ---
@@ -305,10 +308,12 @@ question: |
   What is your role in the case?
 subquestion: |
   ${ collapse_template(which_party) }  
-field: party_label
-choices:
-  - Petitioner: petitioner
-  - Respondent: respondent
+fields:
+  - no label: party_label
+    datatype: radio
+    choices:
+      - Petitioner: petitioner
+      - Respondent: respondent
 ---
 template: which_party
 subject: |
@@ -847,12 +852,17 @@ fields:
     datatype: ThreePartsDate
     alMin: ${ today().format("yyyy-MM-dd") }
 ---
-id: weekly schedule
+id: weekly schedule add another week
 question: |
   Do you want to enter a parenting time schedule for another week?
 subquestion: |
   Review what you have entered so far. You can enter up to 4 weekly schedules.
 
+  **Initials for each parent:**
+
+  * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
+  * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
+  
   % for cnt, current_week in enumerate(week):
     ${ current_week.name}<BR>Start | Mon | Tue | Wed | Thur | Fri | Sat | Sun
     -----|-----|-----|-----|-----|-----|-----|-----
@@ -901,6 +911,50 @@ code: |
 code: |
   if week.number_gathered() == 4:
     week.there_is_another = False
+---
+id: weekly schedule interview review
+question: |
+  Weekly parenting time review
+subquestion: |
+  You entered 4 weekly parenting time schedules. Review your answers below.
+
+  **Initials for each parent:**
+
+  * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
+  * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
+  
+  % for cnt, current_week in enumerate(week):
+    ${ current_week.name}<BR>Start | Mon | Tue | Wed | Thur | Fri | Sat | Sun
+    -----|-----|-----|-----|-----|-----|-----|-----
+    8 AM | ${ current_week.day[0].time_8_am.name.initials } | ${ current_week.day[1].time_8_am.name.initials } | ${ current_week.day[2].time_8_am.name.initials } | ${ current_week.day[3].time_8_am.name.initials } | ${ current_week.day[4].time_8_am.name.initials } | ${ current_week.day[5].time_8_am.name.initials } | ${ current_week.day[6].time_8_am.name.initials } |
+    9 AM | ${ current_week.day[0].time_9_am.name.initials } | ${ current_week.day[1].time_9_am.name.initials } | ${ current_week.day[2].time_9_am.name.initials } | ${ current_week.day[3].time_9_am.name.initials } | ${ current_week.day[4].time_9_am.name.initials } | ${ current_week.day[5].time_9_am.name.initials } | ${ current_week.day[6].time_9_am.name.initials } |
+    10 AM | ${ current_week.day[0].time_10_am.name.initials } | ${ current_week.day[1].time_10_am.name.initials } | ${ current_week.day[2].time_10_am.name.initials } | ${ current_week.day[3].time_10_am.name.initials } | ${ current_week.day[4].time_10_am.name.initials } | ${ current_week.day[5].time_10_am.name.initials } | ${ current_week.day[6].time_10_am.name.initials } |
+    11 AM | ${ current_week.day[0].time_11_am.name.initials } | ${ current_week.day[1].time_11_am.name.initials } | ${ current_week.day[2].time_11_am.name.initials } | ${ current_week.day[3].time_11_am.name.initials } | ${ current_week.day[4].time_11_am.name.initials } | ${ current_week.day[5].time_11_am.name.initials } | ${ current_week.day[6].time_11_am.name.initials } |
+    Noon | ${ current_week.day[0].time_noon.name.initials } | ${ current_week.day[1].time_noon.name.initials } | ${ current_week.day[2].time_noon.name.initials } | ${ current_week.day[3].time_noon.name.initials } | ${ current_week.day[4].time_noon.name.initials } | ${ current_week.day[5].time_noon.name.initials } | ${ current_week.day[6].time_noon.name.initials } |
+    1 PM | ${ current_week.day[0].time_1_pm.name.initials } | ${ current_week.day[1].time_1_pm.name.initials } | ${ current_week.day[2].time_1_pm.name.initials } | ${ current_week.day[3].time_1_pm.name.initials } | ${ current_week.day[4].time_1_pm.name.initials } | ${ current_week.day[5].time_1_pm.name.initials } | ${ current_week.day[6].time_1_pm.name.initials } |    
+    2 PM | ${ current_week.day[0].time_2_pm.name.initials } | ${ current_week.day[1].time_2_pm.name.initials } | ${ current_week.day[2].time_2_pm.name.initials } | ${ current_week.day[3].time_2_pm.name.initials } | ${ current_week.day[4].time_2_pm.name.initials } | ${ current_week.day[5].time_2_pm.name.initials } | ${ current_week.day[6].time_2_pm.name.initials } |
+    3 PM | ${ current_week.day[0].time_3_pm.name.initials } | ${ current_week.day[1].time_3_pm.name.initials } | ${ current_week.day[2].time_3_pm.name.initials } | ${ current_week.day[3].time_3_pm.name.initials } | ${ current_week.day[4].time_3_pm.name.initials } | ${ current_week.day[5].time_3_pm.name.initials } | ${ current_week.day[6].time_3_pm.name.initials } |
+    4 PM | ${ current_week.day[0].time_4_pm.name.initials } | ${ current_week.day[1].time_4_pm.name.initials } | ${ current_week.day[2].time_4_pm.name.initials } | ${ current_week.day[3].time_4_pm.name.initials } | ${ current_week.day[4].time_4_pm.name.initials } | ${ current_week.day[5].time_4_pm.name.initials } | ${ current_week.day[6].time_4_pm.name.initials } |
+    5 PM | ${ current_week.day[0].time_5_pm.name.initials } | ${ current_week.day[1].time_5_pm.name.initials } | ${ current_week.day[2].time_5_pm.name.initials } | ${ current_week.day[3].time_5_pm.name.initials } | ${ current_week.day[4].time_5_pm.name.initials } | ${ current_week.day[5].time_5_pm.name.initials } | ${ current_week.day[6].time_5_pm.name.initials } |
+    6 PM | ${ current_week.day[0].time_6_pm.name.initials } | ${ current_week.day[1].time_6_pm.name.initials } | ${ current_week.day[2].time_6_pm.name.initials } | ${ current_week.day[3].time_6_pm.name.initials } | ${ current_week.day[4].time_6_pm.name.initials } | ${ current_week.day[5].time_6_pm.name.initials } | ${ current_week.day[6].time_6_pm.name.initials } |
+    7 PM | ${ current_week.day[0].time_7_pm.name.initials } | ${ current_week.day[1].time_7_pm.name.initials } | ${ current_week.day[2].time_7_pm.name.initials } | ${ current_week.day[3].time_7_pm.name.initials } | ${ current_week.day[4].time_7_pm.name.initials } | ${ current_week.day[5].time_7_pm.name.initials } | ${ current_week.day[6].time_7_pm.name.initials } |
+    8 PM | ${ current_week.day[0].time_8_pm.name.initials } | ${ current_week.day[1].time_8_pm.name.initials } | ${ current_week.day[2].time_8_pm.name.initials } | ${ current_week.day[3].time_8_pm.name.initials } | ${ current_week.day[4].time_8_pm.name.initials } | ${ current_week.day[5].time_8_pm.name.initials } | ${ current_week.day[6].time_8_pm.name.initials } |
+    9 PM<BR>Over | ${ current_week.day[0].time_9_pm.name.initials } | ${ current_week.day[1].time_9_pm.name.initials } | ${ current_week.day[2].time_9_pm.name.initials } | ${ current_week.day[3].time_9_pm.name.initials } | ${ current_week.day[4].time_9_pm.name.initials } | ${ current_week.day[5].time_9_pm.name.initials } | ${ current_week.day[6].time_9_pm.name.initials } |
+    ${ current_week.name} | ${ action_button_html(url_action('week[' + str(cnt) + '].day[0].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[1].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[2].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[3].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[4].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[5].time_8_am'), label="Edit", icon="pencil-alt") } | ${ action_button_html(url_action('week[' + str(cnt) + '].day[6].time_8_am'), label="Edit", icon="pencil-alt") } |
+
+
+  % endfor
+continue button field: four_week_review
+css: |
+  <style>
+    .table-responsive:not(:first-child) {
+      margin-top: 5em;
+    }
+    .table-responsive:last-child {
+      margin-top: 1em;
+    }
+  </style>
+  
 ---
 id: daily plan
 question:
@@ -1072,7 +1126,7 @@ question: |
 subquestion: |
     ${ collapse_template(parenting_time_conflicts_help) }
 fields:
-  - Select an option below: parenting_holiday
+  - Select an option: parenting_holiday
     datatype: radio
     choices: 
       - Holidays are put into two groups.: holiday_option1
@@ -1232,7 +1286,7 @@ generic object: Thing
 question: |
   What parenting time schedule do you want for ${ get_holiday_name(x) }?
 subquestion: |
-  If you neeed to add other details about holidays, you can explain more when we ask if you want to "add more parenting time information" on another screen.
+  If you need to add other details about holidays, you can explain more when we ask if you want to "add more parenting time information" on another screen.
 fields:
   - no label: x.holiday_year
     datatype: radio
@@ -1509,7 +1563,7 @@ fields:
     datatype: radio
     choices:
       - Drop off and pick up of the children be at each parent's homes unless both parties agree in advance to a different meeting place.: homes
-      - Drop off and pick up will take place at a specific location (address and city): location
+      - Drop off and pick up will take place at a specific location (address and city).: location
   - Location name: exchange_address.location
     maxlength: 40
     show if: 
@@ -1551,6 +1605,20 @@ fields:
     maxlength: 800
 ---
 ## 5.RIGHTS & RESPONSIBILITIES OF THE PARENTS
+id: additional terms intro
+continue button field: additional_terms_intro
+question: |
+  Additional terms to review
+subquestion: |
+  On the next few screens, you can read terms that are part of the statewide Parenting Plan forms.
+
+  These include:
+
+  * Rights and responsibilities of each parent,
+  * How to handle if a parent moves (also called "relocation"), and
+  * How to make changes to the Parenting Plan.
+
+---
 id: rights and responsibilities
 question: |
   Rights and responsibilities of the parents
@@ -1825,7 +1893,7 @@ question: |
 subquestion: |
   Your form is ready. View and download your form below. Click **Make changes** to fix any mistakes.
 
-  This program does not deliver your *${form_name}* to other party in your case. You will need to do that yourself.
+  This program does not deliver your *${form_name}* to the other party in your case. You will need to do that yourself.
 
   ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
 
@@ -1836,7 +1904,7 @@ subquestion: |
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
 
-  **Note:** This program does not deliver your *${form_name}* to other party in your case. You will need to do that yourself.
+  **Note:** This program does not deliver your *${form_name}* to the other party in your case. You will need to do that yourself.
   
   Thank you for using ILAO Easy Forms!
 under: |
@@ -1893,8 +1961,8 @@ attachment:
     skip undefined: True
     editable: False
     fields:
-      - "plan_petitioner": ${ plan_type == 'petitioner' }
-      - "plan_respondent": ${ plan_type == 'respondent' }
+      - "plan_petitioner": ${ True if (plan_type == 'mine' and party_label == 'petitioner') or (party_label == 'respondent' and plan_type == 'other_parent') else False }
+      - "plan_respondent": ${ True if (plan_type == 'mine' and party_label == 'respondent') or (party_label == 'petitioner' and plan_type == 'other_parent') else False }
       - "plan_agreed": ${ plan_type == 'both' }
       #- "plan_court": ${ plan_type == 'court' }
       - "county_name": ${ case_county }
@@ -4797,8 +4865,18 @@ attachment:
     fields:
       - "county_name": ${ case_county }
       - "case_number": ${ case_number }
-      - "petitioner_name": ${ users[0].name.full(middle="full") }
-      - "respondent_name": ${ other_parties[0].name.full(middle="full") }
+      - "petitioner_name": |
+          % if party_label == 'petitioner':
+          ${ users[0].name.full(middle='full') }
+          % else:
+          ${ other_parties[0].name.full(middle='full') }
+          % endif
+      - "respondent_name": |
+          % if party_label == 'respondent':
+          ${ users[0].name.full(middle='full') }
+          % else:
+          ${ other_parties[0].name.full(middle='full') }
+          % endif
       - "child_name4": |
           % if children.number_gathered() >= 4:
           ${ children[3].name.full() }

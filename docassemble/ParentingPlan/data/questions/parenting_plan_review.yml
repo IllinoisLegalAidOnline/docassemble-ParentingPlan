@@ -11,15 +11,19 @@ review:
   - Edit: plan_type
     button: |
       **Whose Parenting Plan is this?**
-      % if plan_type == "petitioner":
+      % if plan_type == "mine":
       Mine
-      % elif plan_type == "respondent":
+      % elif plan_type == "other_parent":
       The other parent's
       % elif plan_type == "both":
       An agreed Parenting Plan
       % else:
       Unsure
       % endif
+  - Edit: party_label
+    button: |
+      **What is your role in the case?**
+      ${ party_label.capitalize() }     
   - Edit: case_county
     button: |
       **County where this case is filed:**
@@ -489,8 +493,12 @@ confirm: True
 id: week review screen
 continue button field: week.revisit
 question: |
-  Reviewing weekly parenting time
+  Edit weekly parenting time
 subquestion: |
+  **Initials for each parent:**
+
+  * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
+  * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
   
   % for cnt, current_week in enumerate(week):
     ${ current_week.name} | Mon | Tue | Wed | Thur | Fri | Sat | Sun
@@ -531,7 +539,7 @@ css: |
 id: holidays review screen
 continue button field: holiday_list.revisit
 question: |
-  Reviewing holiday schedules
+  Edit holiday schedules
 subquestion: |
   Holiday | Edit 
   -------- | -----
@@ -584,7 +592,7 @@ confirm: True
 id: additional holidays review screen
 continue button field: other_holidays.revisit
 question: |
-  Reviewing additional holidays
+  Edit additional holidays
 subquestion: |
     ${ other_holidays.table }
 
@@ -606,15 +614,19 @@ review:
   - Edit: plan_type
     button: |
       **Whose Parenting Plan is this?**
-      % if plan_type == "petitioner":
+      % if plan_type == "mine":
       Mine
-      % elif plan_type == "respondent":
+      % elif plan_type == "other_parent":
       The other parent's
       % elif plan_type == "both":
       An agreed Parenting Plan
       % else:
       Unsure
       % endif
+  - Edit: party_label
+    button: |
+      **What is your role in the case?**
+      ${ party_label.capitalize() }     
   - Edit: case_county
     button: |
       **County where this case is filed:**
