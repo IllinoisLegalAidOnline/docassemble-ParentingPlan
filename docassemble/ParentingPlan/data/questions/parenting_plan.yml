@@ -3002,9 +3002,6 @@ attachment:
       # HOLIDAY PARENTING TIME SCHEDULE 
       - "holiday_groups": |
           ${ parenting_holiday == "holiday_option1" }
-      - "groupA1": Thanksgiving Day
-      - "groupA2": Christmas Eve
-      - "groupA3": New Year's Eve
       - "groupA4": |
           % if parenting_holiday == "holiday_option1":
             % if defined('other_a1_yes') and other_a1_yes:
@@ -3035,9 +3032,6 @@ attachment:
             ${ other_a5 }
             % endif
           % endif
-      - "groupB1": 4th of July
-      - "groupB2": Labor Day
-      - "groupB3": Christmas Day
       - "groupB4": |
           % if parenting_holiday == "holiday_option1":
             % if defined('other_b1_yes') and other_b1_yes:
