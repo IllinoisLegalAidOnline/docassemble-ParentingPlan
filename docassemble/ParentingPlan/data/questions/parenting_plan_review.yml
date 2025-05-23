@@ -251,7 +251,7 @@ review:
   - Edit: holiday_list.revisit
     button: |
       **Use the Edit button to review the common holidays.**
-    show if: parenting_holiday == "holiday_option2"
+    show if: parenting_holiday == "holiday_option2" and holiday_list.any_true()
   - Edit: other_holidays.there_are_any
     button: |
       **Do you have additional holidays you want to include?**
@@ -874,7 +874,7 @@ review:
   - Edit: holiday_list.revisit
     button: |
       **Use the Edit button to review the common holidays.**
-    show if: parenting_holiday == "holiday_option2"
+    show if: parenting_holiday == "holiday_option2" and holiday_list.any_true()
   - Edit: other_holidays.there_are_any
     button: |
       **Do you have additional holidays you want to include?**
