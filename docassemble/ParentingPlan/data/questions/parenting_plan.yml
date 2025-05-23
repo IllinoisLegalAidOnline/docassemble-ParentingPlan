@@ -1126,13 +1126,13 @@ question: |
 subquestion: |
     ${ collapse_template(parenting_time_conflicts_help) }
 fields:
-  - Select an option: parenting_holiday
+  - no label: parenting_holiday
     datatype: radio
     choices: 
-      - Holidays are put into two groups.: holiday_option1
+      - "Holidays are **divided into two groups**. Click :question-circle: for details.": holiday_option1
         help: |
-          Each group contains 3 set holidays plus up to 5 other holidays you can choose. **Group A Holidays** include Thanksgiving Day, Christmas Eve, and New Year's Eve. **Group B Holidays** include the 4th of July, Labor Day, and Christmas Day. 
-      - Each holiday is handled separately.: holiday_option2
+          Each group contains 3 set holidays plus up to 5 other holidays you can choose. **Group A Holidays** include Thanksgiving Day, Christmas Eve, and New Year's Eve. **Group B Holidays** include the 4th of July, Labor Day, and Christmas Day.
+      - Each holiday is **handled separately**. For each holiday, you can decide if you want any changes to the regular parenting time schedule.: holiday_option2
       - I will decide holiday parenting time later. This means I will fill out the schedule by hand or attach one to the *${form_name}*.: other
 ---
 id: holiday by groups
