@@ -31,7 +31,7 @@ objects:
   - christmas_eve: Thing
   - christmas_day: Thing
   - new_years_eve: Thing
-  - holiday_list: DAList.using(object_type=Thing, there_are_any=True)
+  - holiday_list: DAList.using(object_type=Thing, there_are_any=False)
   - other_holidays: DAList.using(object_type=Thing, complete_attribute='complete')
   - exchange_address: ALIndividual
   - court_list: ALCourtLoader.using(file_name='docassemble.ILAO:data/sources/il_courts.xlsx')
@@ -140,7 +140,7 @@ code: |
     if parenting_holiday == "holiday_option2":
       if holiday_list.any_true():
         prepopulated_holidays
-        other_holidays.gather()
+      other_holidays.gather()
 
   if school_breaks:
     spring_break
@@ -1244,12 +1244,11 @@ subquestion: |
 fields:
   - "Which holidays do you want to include in the parenting time schedule?": holiday_list
     datatype: checkboxes
-    none of the above: False
+    none of the above: True
     all of the above: True
     choices:
       code: | 
         holidays
-continue button field: holiday_list.there_is_another
 ---
 reconsider: True
 depends on:
