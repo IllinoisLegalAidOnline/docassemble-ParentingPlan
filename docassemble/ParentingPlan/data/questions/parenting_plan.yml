@@ -192,8 +192,10 @@ code: |
   if showifdef('parenting_holiday'):
     if parenting_holiday == "holiday_option1":
       stuff_to_snapshot['holiday_groups'] = True
-    else:
+    elif parenting_holiday == "holiday_option2":
       stuff_to_snapshot['holiday_separate'] = True
+    else:
+      stuff_to_snapshot['holiday_none'] = True
   
   stuff_to_snapshot['downloaded_forms'] = showifdef('forms_assembling')
   
