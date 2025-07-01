@@ -41,7 +41,7 @@ review:
   - Edit: users[0].name.first
     button: |
       **Your name:**
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
   - Edit: hide_contact
     button: |
       **Do you want to hide your address?**
@@ -73,7 +73,7 @@ review:
   - Edit: employer.name.first
     button: |
       **Employer name:**
-      ${ employer.name.full(middle="full") }
+      ${ employer.name_full() }
       
       **Employer address:**
       ${ employer.address.on_one_line(bare=True) }
@@ -84,10 +84,10 @@ review:
   - Edit: other_parties[0].name.first
     button: |
       **Other parent's name:**
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
   - Edit: has_other_address
     button: |
-      **Is ${ other_parties[0].name.full(middle="full") }'s address listed on other court forms?**
+      **Is ${ other_parties[0].name_full() }'s address listed on other court forms?**
       ${ word(yesno(has_other_address))}  
   - Edit: other_parties[0].address.address
     button: |
@@ -111,12 +111,12 @@ review:
       % endif
   - Edit: has_other_employer
     button: |
-      **Does ${ other_parties[0].name.full(middle="full") } have a job?**
+      **Does ${ other_parties[0].name_full() } have a job?**
       ${word(yesno(has_other_employer))}
   - Edit: other_employer.name.first
     button: |
       **Employer name:**
-      ${ other_employer.name.full(middle="full") }
+      ${ other_employer.name_full() }
       
       **Employer address:**
       ${ other_employer.address.on_one_line(bare=True) }
@@ -138,9 +138,9 @@ review:
       **Education decisions will be made by:**
 
       % if eduction_decisions == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif eduction_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % elif eduction_decisions == "both":
       Both parents
       % endif
@@ -149,9 +149,9 @@ review:
       **Healthcare decisions will be made by:**
 
       % if health_decisions == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif health_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % elif health_decisions == "both":
       Both parents
       % endif
@@ -160,9 +160,9 @@ review:
       **Religious decisions will be made by:**
 
       % if religious_decisions == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif religious_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % elif religious_decisions == "both":
       Both parents
       % endif
@@ -171,9 +171,9 @@ review:
       **Activity decisions will be made by:**
 
       % if activities_decisions == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif activities_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % elif activities_decisions == "both":
       Both parents
       % endif
@@ -189,8 +189,8 @@ review:
     button: |
       **Initials for each parent:**
 
-      * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
-      * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
+      * ${ users[0].name_full() } will use ${ users[0].name.initials } 
+      * ${ other_parties[0].name_full() } will use ${ other_parties[0].name.initials }
     show if: parenting_time == "yes" or parenting_holiday != "other" or school_breaks
   - Edit: schedule_start
     button: |
@@ -279,15 +279,15 @@ review:
       * Alternate spring break on even and odd years
 
         % if spring_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have the even-numbered years.
+          ${ users[0].name_full() } will have the even-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have the even-numbered years.
+          ${ other_parties[0].name_full() } will have the even-numbered years.
         % endif
         
         % if spring_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have the odd-numbered years.
+          ${ users[0].name_full() } will have the odd-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have the odd-numbered years.
+          ${ other_parties[0].name_full() } will have the odd-numbered years.
         % endif
       % elif spring_break == "other":
       * Other: ${ spring_break_other }
@@ -307,15 +307,15 @@ review:
       * Each parent will have 2 non-consecutive weeks in the summer
 
         % if summer_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first choice of dates in even-numbered years.
+          ${ users[0].name_full() } will have first choice of dates in even-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have first choice of dates in even-numbered years.
+          ${ other_parties[0].name_full() } will have first choice of dates in even-numbered years.
         % endif
         
         % if summer_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first choice of dates in odd-numbered years.
+          ${ users[0].name_full() } will have first choice of dates in odd-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have first choice of dates in odd-numbered years.
+          ${ other_parties[0].name_full() } will have first choice of dates in odd-numbered years.
         % endif
 
       % elif summer_break == "other":
@@ -336,15 +336,15 @@ review:
       * Alternate winter break on even and odd years
 
         % if winter_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first half of winter break in even-numbered years.
+          ${ users[0].name_full() } will have first half of winter break in even-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have first half of winter break in even-numbered years.
+          ${ other_parties[0].name_full() } will have first half of winter break in even-numbered years.
         % endif
         
         % if winter_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first half of winter break in odd-numbered years.
+          ${ users[0].name_full() } will have first half of winter break in odd-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have first half of winter break in odd-numbered years.
+          ${ other_parties[0].name_full() } will have first half of winter break in odd-numbered years.
         % endif
 
       % elif winter_break == "other":
@@ -360,9 +360,9 @@ review:
       **Parenting time transportation of children:**
 
       % if transportation == "me":
-      ${ users[0].name.full(middle="full") } will provide all transportation.
+      ${ users[0].name_full() } will provide all transportation.
       % elif transportation == "them":
-      ${ other_parties[0].name.full(middle="full") } will provide all transportation.
+      ${ other_parties[0].name_full() } will provide all transportation.
       % elif transportation == "pick_up":
       Each parent will pick up the children at the start of their parenting time.
       % elif transportation == "drop_off":
@@ -420,18 +420,18 @@ review:
       **Parent with the majority of parenting time:**
 
       % if primary_parent == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif primary_parent == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % endif
   - Edit: residential_address
     button: |
       **Children's residential address:**
 
       % if residential_address == "me":
-      Home of ${ users[0].name.full(middle="full") }
+      Home of ${ users[0].name_full() }
       % elif residential_address == "them":
-      Home of ${ other_parties[0].name.full(middle="full") }
+      Home of ${ other_parties[0].name_full() }
       % endif
   - Edit: mediation_option
     button: |
@@ -497,8 +497,8 @@ question: |
 subquestion: |
   **Initials for each parent:**
 
-  * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
-  * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
+  * ${ users[0].name_full() } will use ${ users[0].name.initials } 
+  * ${ other_parties[0].name_full() } will use ${ other_parties[0].name.initials }
   
   % for cnt, current_week in enumerate(week):
     ${ current_week.name} | Mon | Tue | Wed | Thur | Fri | Sat | Sun
@@ -651,7 +651,7 @@ review:
   - Edit: users[0].name.first
     button: |
       **Your name:**
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
   - Edit: hide_contact
     button: |
       **Do you want to hide your address?**
@@ -683,7 +683,7 @@ review:
   - Edit: employer.name.first
     button: |
       **Employer name:**
-      ${ employer.name.full(middle="full") }
+      ${ employer.name_full() }
       
       **Employer address:**
       ${ employer.address.on_one_line(bare=True) }
@@ -694,10 +694,10 @@ review:
   - Edit: other_parties[0].name.first
     button: |
       **Other parent's name:**
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
   - Edit: has_other_address
     button: |
-      **Is ${ other_parties[0].name.full(middle="full") }'s address listed on other court forms?**
+      **Is ${ other_parties[0].name_full() }'s address listed on other court forms?**
       ${ word(yesno(has_other_address))}  
   - Edit: other_parties[0].address.address
     button: |
@@ -721,12 +721,12 @@ review:
       % endif
   - Edit: has_other_employer
     button: |
-      **Does ${ other_parties[0].name.full(middle="full") } have a job?**
+      **Does ${ other_parties[0].name_full() } have a job?**
       ${word(yesno(has_other_employer))}
   - Edit: other_employer.name.first
     button: |
       **Employer name:**
-      ${ other_employer.name.full(middle="full") }
+      ${ other_employer.name_full() }
       
       **Employer address:**
       ${ other_employer.address.on_one_line(bare=True) }
@@ -755,9 +755,9 @@ review:
       **Education decisions will be made by:**
 
       % if eduction_decisions == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif eduction_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % elif eduction_decisions == "both":
       Both parents
       % endif
@@ -766,9 +766,9 @@ review:
       **Healthcare decisions will be made by:**
 
       % if health_decisions == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif health_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % elif health_decisions == "both":
       Both parents
       % endif
@@ -777,9 +777,9 @@ review:
       **Religious decisions will be made by:**
 
       % if religious_decisions == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif religious_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % elif religious_decisions == "both":
       Both parents
       % endif
@@ -788,9 +788,9 @@ review:
       **Activity decisions will be made by:**
 
       % if activities_decisions == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif activities_decisions == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % elif activities_decisions == "both":
       Both parents
       % endif
@@ -812,8 +812,8 @@ review:
     button: |
       **Initials for each parent:**
 
-      * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
-      * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
+      * ${ users[0].name_full() } will use ${ users[0].name.initials } 
+      * ${ other_parties[0].name_full() } will use ${ other_parties[0].name.initials }
     show if: parenting_time == "yes" or parenting_holiday != "other" or school_breaks
   - Edit: schedule_start
     button: |
@@ -902,15 +902,15 @@ review:
       * Alternate spring break on even and odd years
 
         % if spring_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have the even-numbered years.
+          ${ users[0].name_full() } will have the even-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have the even-numbered years.
+          ${ other_parties[0].name_full() } will have the even-numbered years.
         % endif
         
         % if spring_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have the odd-numbered years.
+          ${ users[0].name_full() } will have the odd-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have the odd-numbered years.
+          ${ other_parties[0].name_full() } will have the odd-numbered years.
         % endif
       % elif spring_break == "other":
       * Other: ${ spring_break_other }
@@ -930,15 +930,15 @@ review:
       * Each parent will have 2 non-consecutive weeks in the summer
 
         % if summer_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first choice of dates in even-numbered years.
+          ${ users[0].name_full() } will have first choice of dates in even-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have first choice of dates in even-numbered years.
+          ${ other_parties[0].name_full() } will have first choice of dates in even-numbered years.
         % endif
         
         % if summer_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first choice of dates in odd-numbered years.
+          ${ users[0].name_full() } will have first choice of dates in odd-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have first choice of dates in odd-numbered years.
+          ${ other_parties[0].name_full() } will have first choice of dates in odd-numbered years.
         % endif
 
       % elif summer_break == "other":
@@ -959,15 +959,15 @@ review:
       * Alternate winter break on even and odd years
 
         % if winter_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first half of winter break in even-numbered years.
+          ${ users[0].name_full() } will have first half of winter break in even-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have first half of winter break in even-numbered years.
+          ${ other_parties[0].name_full() } will have first half of winter break in even-numbered years.
         % endif
         
         % if winter_break_year == "me":
-          ${ users[0].name.full(middle="full") } will have first half of winter break in odd-numbered years.
+          ${ users[0].name_full() } will have first half of winter break in odd-numbered years.
         % else:
-          ${ other_parties[0].name.full(middle="full") } will have first half of winter break in odd-numbered years.
+          ${ other_parties[0].name_full() } will have first half of winter break in odd-numbered years.
         % endif
 
       % elif winter_break == "other":
@@ -983,9 +983,9 @@ review:
       **Parenting time transportation of children:**
 
       % if transportation == "me":
-      ${ users[0].name.full(middle="full") } will provide all transportation.
+      ${ users[0].name_full() } will provide all transportation.
       % elif transportation == "them":
-      ${ other_parties[0].name.full(middle="full") } will provide all transportation.
+      ${ other_parties[0].name_full() } will provide all transportation.
       % elif transportation == "pick_up":
       Each parent will pick up the children at the start of their parenting time.
       % elif transportation == "drop_off":
@@ -1049,18 +1049,18 @@ review:
       **Parent with the majority of parenting time:**
 
       % if primary_parent == "me":
-      ${ users[0].name.full(middle="full") }
+      ${ users[0].name_full() }
       % elif primary_parent == "them":
-      ${ other_parties[0].name.full(middle="full") }
+      ${ other_parties[0].name_full() }
       % endif
   - Edit: residential_address
     button: |
       **Children's residential address:**
 
       % if residential_address == "me":
-      Home of ${ users[0].name.full(middle="full") }
+      Home of ${ users[0].name_full() }
       % elif residential_address == "them":
-      Home of ${ other_parties[0].name.full(middle="full") }
+      Home of ${ other_parties[0].name_full() }
       % endif
   - Edit: mediation_option
     button: |

@@ -494,7 +494,7 @@ fields:
 ---
 id: listed address for other party
 question: |
-  Is ${other_parties[0].name.full(middle="full")}'s address listed on other court forms in this case?
+  Is ${other_parties[0].name_full()}'s address listed on other court forms in this case?
 subquestion: |
   Their address might not have been listed on other court papers due to domestic violence or abuse.
 fields:
@@ -508,7 +508,7 @@ sets:
   - other_parties[0].address.state
   - other_parties[0].address.zip
 question: |
-  What is ${other_parties[0].name.full(middle="full")}'s address?
+  What is ${other_parties[0].name_full()}'s address?
 fields:
   - Street address: other_parties[0].address.address
     address autocomplete: True
@@ -523,7 +523,7 @@ fields:
 ---
 id: your contact information
 question: |
-  What is ${other_parties[0].name.full(middle="full")}'s contact information?
+  What is ${other_parties[0].name_full()}'s contact information?
 fields:  
   - Phone number: other_parties[0].phone_number
     datatype: al_international_phone
@@ -534,7 +534,7 @@ fields:
 ---
 id: other parties employment
 question: |
-  Does ${other_parties[0].name.full(middle="full")} have a job?
+  Does ${other_parties[0].name_full()} have a job?
 fields:
   - no label: has_other_employer
     datatype: yesnoradio
@@ -543,7 +543,7 @@ sets:
   - other_employer.name.first
 id: other parties employer info 
 question: |
-  Employer information for ${other_parties[0].name.full(middle="full")}
+  Employer information for ${other_parties[0].name_full()}
 fields: 
   - code: |
       other_employer.name_fields(person_or_business='unsure')
@@ -574,7 +574,7 @@ question: |
   What is the ${ ordinal(i) } child's name?
 subquestion:
   This minor child must be born to or adopted by you and 
-  ${other_parties[0].name.full(middle="full")}.
+  ${other_parties[0].name_full()}.
 
   Only children under 18 can be included in a ${form_name}.
 fields:
@@ -585,9 +585,9 @@ id: add child age
 sets:
   - children[i].birthdate
 question: |
-  When is ${children[i].name.full(middle="full")}'s birth date?
+  When is ${children[i].name_full()}'s birth date?
 subquestion: |
-  Only children under 18 can be included in a ${form_name}. If ${children[i].name.full(middle='full')} is 18 or older, you should click **< Back** twice and not add them to the Parenting Plan.
+  Only children under 18 can be included in a ${form_name}. If ${children[i].name_full()} is 18 or older, you should click **< Back** twice and not add them to the Parenting Plan.
 fields:
   - Birth date: children[i].birthdate
     datatype: BirthDate
@@ -599,12 +599,12 @@ validation code: |
 ---
 id: any other children
 question: |
-  Do you have another child with ${other_parties[0].name.full(middle="full")}?
+  Do you have another child with ${other_parties[0].name_full()}?
 subquestion: |
   So far you have told us about ${comma_and_list(children.full_names())}.
 
   Your *${form_name}* must include minor children born to or adopted by you 
-  and ${other_parties[0].name.full(middle="full")}.
+  and ${other_parties[0].name_full()}.
 
   **Note**: The form can accept up to 10 children in total.
 fields:
@@ -626,7 +626,7 @@ fields:
     datatype: radio
     choices:
       - Me only: me
-      - ${other_parties[0].name.full(middle="full")} only: them
+      - ${other_parties[0].name_full()} only: them
       - Both parents: both
 ---
 id: healthcare decisions
@@ -639,7 +639,7 @@ fields:
     datatype: radio
     choices:
       - Me only: me
-      - ${other_parties[0].name.full(middle="full")} only: them
+      - ${other_parties[0].name_full()} only: them
       - Both parents: both
 ---
 id: religious decisions
@@ -650,7 +650,7 @@ fields:
     datatype: radio
     choices:
       - Me only: me
-      - ${other_parties[0].name.full(middle="full")} only: them
+      - ${other_parties[0].name_full()} only: them
       - Both parents: both
 ---
 id: activities decisions
@@ -663,7 +663,7 @@ fields:
     datatype: radio
     choices:
       - Me only: me
-      - ${other_parties[0].name.full(middle="full")} only: them
+      - ${other_parties[0].name_full()} only: them
       - Both parents: both
 ---
 id: refuse childcare
@@ -740,7 +740,7 @@ fields:
     datatype: radio
     choices:
       - Me: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${other_parties[0].name_full()}: them
 ---
 id: residential address
 question: |
@@ -752,7 +752,7 @@ fields:
     datatype: radio
     choices:
       - Me: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${other_parties[0].name_full()}: them
 ---
 id: handling conflicts
 question: |
@@ -836,10 +836,10 @@ question: |
 subquestion: |
   Enter the initials for each parent. These initials will be used in the *${form_name}* to identify who has parenting time.
 fields:
-  - ${ users[0].name.full(middle="full") }: users[0].name.initials
+  - ${ users[0].name_full() }: users[0].name.initials
     maxlength: 4
     default: ${ users[0].name.first[:1] + users[0].name.last[:1] }
-  - ${ other_parties[0].name.full(middle="full") }: other_parties[0].name.initials
+  - ${ other_parties[0].name_full() }: other_parties[0].name.initials
     maxlength: 4
     default: ${ other_parties[0].name.first[:1] + other_parties[0].name.last[:1] }
 validation code: |
@@ -862,8 +862,8 @@ subquestion: |
 
   **Initials for each parent:**
 
-  * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
-  * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
+  * ${ users[0].name_full() } will use ${ users[0].name.initials } 
+  * ${ other_parties[0].name_full() } will use ${ other_parties[0].name.initials }
   
   % for cnt, current_week in enumerate(week):
     ${ current_week.name}<BR>Start | Mon | Tue | Wed | Thur | Fri | Sat | Sun
@@ -922,8 +922,8 @@ subquestion: |
 
   **Initials for each parent:**
 
-  * ${ users[0].name.full(middle="full") } will use ${ users[0].name.initials } 
-  * ${ other_parties[0].name.full(middle="full") } will use ${ other_parties[0].name.initials }
+  * ${ users[0].name_full() } will use ${ users[0].name.initials } 
+  * ${ other_parties[0].name_full() } will use ${ other_parties[0].name.initials }
   
   % for cnt, current_week in enumerate(week):
     ${ current_week.name}<BR>Start | Mon | Tue | Wed | Thur | Fri | Sat | Sun
@@ -972,7 +972,7 @@ subquestion: |
     <i class="fas fa-check-circle"></i> Select all times for <b>Me (${ users[0].name.initials })</b>
   </button>  <BR><BR>
   <button id="other_parent" class="btn btn-info">
-    <i class="fas fa-check-circle"></i> Select all times for <b>${ other_parties[0].name.full(middle="full")} (${ other_parties[0].name.initials })</b>
+    <i class="fas fa-check-circle"></i> Select all times for <b>${ other_parties[0].name_full()} (${ other_parties[0].name.initials })</b>
   </button> <BR><BR>
   <button id="clear_all" class="btn btn-warning">
     <i class="fas fa-eraser"></i> Clear all selections
@@ -1293,7 +1293,7 @@ fields:
     datatype: radio
     choices:
       - I will get the children every year.: me
-      - ${ other_parties[0].name.full(middle="full") } will get the children every year.: them
+      - ${ other_parties[0].name_full() } will get the children every year.: them
       - I will get the children only on odd years.: odd
       - I will get the children only on even years.: even
   - Start time: x.holiday_start
@@ -1339,7 +1339,7 @@ fields:
     datatype: radio
     choices:
       - I will get the children every year.: me
-      - ${ other_parties[0].name.full(middle="full") } will get the children every year.: them
+      - ${ other_parties[0].name_full() } will get the children every year.: them
       - I will get the children only on odd years.: odd
       - I will get the children only on even years.: even
   - Start time: other_holidays[i].holiday_start
@@ -1412,7 +1412,7 @@ fields:
     datatype: radio
     choices:
       - Me: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${other_parties[0].name_full()}: them
     show if:
       variable: spring_break
       is: split
@@ -1462,7 +1462,7 @@ fields:
     datatype: radio
     choices:
       - Me: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${other_parties[0].name_full()}: them
     show if:
       variable: summer_break
       is: split
@@ -1511,7 +1511,7 @@ fields:
     datatype: radio
     choices:
       - Me: me
-      - ${other_parties[0].name.full(middle="full")}: them
+      - ${other_parties[0].name_full()}: them
     show if:
       variable: winter_break
       is: split
@@ -1543,7 +1543,7 @@ fields:
     datatype: radio
     choices:
       - I will provide all transportation.: me
-      - ${ other_parties[0].name.full(middle="full") } will provide all transportation.: them
+      - ${ other_parties[0].name_full() } will provide all transportation.: them
       - Each parent will pick up the children at the start of their parenting time.: pick_up
       - Each parent will drop off the children at the end of their parenting time.: drop_off
       - Other: other
@@ -1971,15 +1971,15 @@ attachment:
       - "case_number": ${ case_number }
       - "petitioner_name": |
           % if party_label == 'petitioner':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "respondent_name": |
           % if party_label == 'respondent':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "petitioner_address": |
           % if party_label == 'petitioner':
@@ -2018,11 +2018,11 @@ attachment:
       - "petitioner_employer_name": |
           % if party_label == 'petitioner':
             % if has_employer:
-            ${ employer.name.full(middle="full") }
+            ${ employer.name_full() }
             % endif
           % else:
             % if has_other_employer:
-            ${ other_employer.name.full(middle="full") }
+            ${ other_employer.name_full() }
             % endif
           % endif
       - "petitioner_employer_address": |
@@ -2082,11 +2082,11 @@ attachment:
       - "respondent_employer_name": |
           % if party_label == 'respondent':
             % if has_employer:
-            ${ employer.name.full(middle="full") }
+            ${ employer.name_full() }
             % endif
           % else:
             % if has_other_employer:
-            ${ other_employer.name.full(middle="full") }
+            ${ other_employer.name_full() }
             % endif
           % endif
       - "respondent_employer_address": |
@@ -4032,15 +4032,15 @@ attachment:
       - "case_number": ${ case_number }
       - "plan_petitioner": |
           % if party_label == 'petitioner':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "plan_respondent": |
           % if party_label == 'respondent':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       # Week 3 - Monday
       - "week3_mon_8am": |
@@ -4863,15 +4863,15 @@ attachment:
       - "case_number": ${ case_number }
       - "petitioner_name": |
           % if party_label == 'petitioner':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "respondent_name": |
           % if party_label == 'respondent':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "child_name4": |
           % if children.number_gathered() >= 4:
