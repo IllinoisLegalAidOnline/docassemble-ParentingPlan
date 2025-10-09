@@ -241,7 +241,7 @@ subquestion: |
   * How you want to split parenting time (formerly "visitation"), and
   * Information about your divorce or parental responsibilities court case such as case number and county.
 
-  It could take 20 minutes to 40 minutes to finish this program. You can log in and save your work to return to later. 
+  It could take 20 minutes to 40 minutes to finish this program. You can log in and save your work to continue later. 
  
   ${ collapse_template(help_example) }  
 
@@ -587,7 +587,7 @@ sets:
 question: |
   When is ${children[i].name_full()}'s birth date?
 subquestion: |
-  Only children under 18 can be included in a ${form_name}. If ${children[i].name.full(middle='full')} is 18 or older, you should click **< Back** twice and not add them to the Parenting Plan.
+  Only children under 18 can be included in a ${form_name}. If ${children[i].name_full()} is 18 or older, you should click **< Back** twice and not add them to the Parenting Plan.
 fields:
   - Birth date: children[i].birthdate
     datatype: BirthDate
@@ -723,6 +723,11 @@ fields:
     show if: 
       variable: communication
       is: other
+  - note: |
+      The form has room for about **200 characters** including spaces.
+    show if: 
+      variable: communication
+      is: other
 validation code: |
   if defined('daily_start') and defined('daily_end'):
     if daily_start > daily_end:
@@ -732,9 +737,9 @@ id: primary custody
 question: |
   Which parent will have the most parenting time with the children?
 subquestion: |
-  This will not affect parents' rights and responsibilities under the *${form_name}*.
+  Some institutions may use this to determine "custody" for other purposes. Even if parenting time is split evenly between both parents, some states or agencies may require this.
 
-  Some institutions may use this to determine "custody" for other purposes.
+  **Note:** This will not affect either parents' rights and responsibilities under the *${form_name}*.
 fields:
   - no label: primary_parent
     datatype: radio
@@ -791,6 +796,11 @@ fields:
     show if: 
       variable: mediation_reason['other']
       is: True
+  - note: |
+      The form has room for about **200 characters** including spaces.
+    show if: 
+      variable: mediation_reason['other']
+      is: True      
   - note: |
       A parent must file a petition to change the *${form_name}* or a petition to 
       enforce the *${form_name}* with the court.
@@ -1422,6 +1432,11 @@ fields:
     show if:
       variable: spring_break
       is: other
+  - note: |
+      The form has room for about **150 characters** including spaces.
+    show if:
+      variable: spring_break
+      is: other
   - Start day and time: spring_break_start
     maxlength: 30
     show if:
@@ -1472,6 +1487,11 @@ fields:
     show if:
       variable: summer_break
       is: other
+  - note: |
+      The form has room for about **150 characters** including spaces.
+    show if:
+      variable: summer_break
+      is: other      
   - Start day and time: summer_break_start
     maxlength: 30
     show if:
@@ -1521,6 +1541,11 @@ fields:
     show if:
       variable: winter_break
       is: other
+  - note: |
+      The form has room for about **150 characters** including spaces.
+    show if:
+      variable: winter_break
+      is: other
   - Start day and time: winter_break_start
     maxlength: 30
     show if:
@@ -1550,6 +1575,11 @@ fields:
   - Other transportation plan: transportation_other
     datatype: area
     maxlength: 200
+    show if: 
+      variable: transportation
+      is: other
+  - note: |
+      The form has room for about **200 characters** including spaces.
     show if: 
       variable: transportation
       is: other
@@ -1603,7 +1633,10 @@ question: |
 fields:
   - no label: additional_time_details
     datatype: area
-    maxlength: 800
+    rows: 20
+    maxlength: 1200
+  - note: |
+      The form has room for about **1,200 characters** including spaces.
 ---
 ## 5.RIGHTS & RESPONSIBILITIES OF THE PARENTS
 id: additional terms intro
@@ -1893,7 +1926,7 @@ event: get_docs_screen
 question: |
   Download
 subquestion: |
-  Your form is ready. View and download your form below. Click **Make changes** to fix any mistakes.
+  Your form is ready. View and download your form below. Click **:edit: Make changes** to fix any mistakes.
 
   This program does not deliver your *${form_name}* to the other party in your case. You will need to do that yourself.
 
@@ -1971,15 +2004,15 @@ attachment:
       - "case_number": ${ case_number }
       - "petitioner_name": |
           % if party_label == 'petitioner':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "respondent_name": |
           % if party_label == 'respondent':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "petitioner_address": |
           % if party_label == 'petitioner':
@@ -4032,15 +4065,15 @@ attachment:
       - "case_number": ${ case_number }
       - "plan_petitioner": |
           % if party_label == 'petitioner':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "plan_respondent": |
           % if party_label == 'respondent':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       # Week 3 - Monday
       - "week3_mon_8am": |
@@ -4840,7 +4873,7 @@ attachment:
           % if week.number_gathered() == 4:
             ${ week[3].day[6].time_9_pm.name.initials }
           % endif
-      - "addtional_information": |
+      - "additional_information": |
           % if additional_time:
           ${ additional_time_details }
           % endif
@@ -4863,15 +4896,15 @@ attachment:
       - "case_number": ${ case_number }
       - "petitioner_name": |
           % if party_label == 'petitioner':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "respondent_name": |
           % if party_label == 'respondent':
-          ${ users[0].name.full(middle='full') }
+          ${ users[0].name_full() }
           % else:
-          ${ other_parties[0].name.full(middle='full') }
+          ${ other_parties[0].name_full() }
           % endif
       - "child_name4": |
           % if children.number_gathered() >= 4:

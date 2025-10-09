@@ -1,3 +1,28 @@
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
+
 [build-system]
-requires = ["setuptools"]
+requires = [
+    "setuptools==80.9.0",
+]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "docassemble.ParentingPlan"
+version = "1.0.3"
+description = "A docassemble extension."
+readme = "README.md"
+authors = [
+    { name = "Jim Graszer", email = "jim@lemmalegal.com" },
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://docassemble.org"
+
+[tool.setuptools.packages.find]
+where = [
+    ".",
+]
