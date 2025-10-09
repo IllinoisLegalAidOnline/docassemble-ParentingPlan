@@ -290,7 +290,7 @@ review:
           ${ other_parties[0].name_full() } will have the odd-numbered years.
         % endif
       % elif spring_break == "other":
-      * Other: ${ spring_break_other }
+      * Other: ${ spring_break_other.replace("\n", " ").replace("\r", " ") }
 
       Start day and time: ${ spring_break_start }
 
@@ -319,7 +319,7 @@ review:
         % endif
 
       % elif summer_break == "other":
-      * Other: ${ summer_break_other }
+      * Other: ${ summer_break_other.replace("\n", " ").replace("\r", " ") }
 
       Start day and time: ${ summer_break_start }
 
@@ -348,7 +348,7 @@ review:
         % endif
 
       % elif winter_break == "other":
-      * Other: ${ winter_break_other }
+      * Other: ${ winter_break_other.replace("\n", " ").replace("\r", " ") }
 
       Start day and time: ${ winter_break_start }
 
@@ -368,7 +368,7 @@ review:
       % elif transportation == "drop_off":
       Each parent will drop off the children at the end of their parenting time.
       % elif transportation == "other":
-      ${ transportation_other } 
+      ${ transportation_other.replace("\n", " ").replace("\r", " ") } 
       % endif
   - Edit: exchange_location
     button: |
@@ -400,7 +400,7 @@ review:
       ${ format_time(daily_end, 'hh:mm a') }
       % elif communication == "other":
       Other: 
-      ${ other_description }
+      ${ other_description.replace("\n", " ").replace("\r", " ") }
       % endif
   - Edit: additional_time
     button: |
@@ -447,8 +447,8 @@ review:
       % if mediation_reason['history']:
       * There is a history of domestic violence between the parties.
       % endif
-      % if mediation_reason['history']:
-      * Other reason: ${ other_reasons } 
+      % if mediation_reason['other']:
+      * Other reason: ${ other_reasons.replace("\n", " ").replace("\r", " ") } 
       % endif
       % endif
 
@@ -913,7 +913,7 @@ review:
           ${ other_parties[0].name_full() } will have the odd-numbered years.
         % endif
       % elif spring_break == "other":
-      * Other: ${ spring_break_other }
+      * Other: ${ spring_break_other.replace("\n", " ").replace("\r", " ") }
 
       Start day and time: ${ spring_break_start }
 
@@ -942,7 +942,7 @@ review:
         % endif
 
       % elif summer_break == "other":
-      * Other: ${ summer_break_other }
+      * Other: ${ summer_break_other.replace("\n", " ").replace("\r", " ") }
 
       Start day and time: ${ summer_break_start }
 
@@ -971,7 +971,7 @@ review:
         % endif
 
       % elif winter_break == "other":
-      * Other: ${ winter_break_other }
+      * Other: ${ winter_break_other.replace("\n", " ").replace("\r", " ") }
 
       Start day and time: ${ winter_break_start }
 
@@ -991,7 +991,7 @@ review:
       % elif transportation == "drop_off":
       Each parent will drop off the children at the end of their parenting time.
       % elif transportation == "other":
-      ${ transportation_other } 
+      ${ transportation_other.replace("\n", " ").replace("\r", " ") } 
       % endif
   - Edit: exchange_location
     button: |
@@ -1023,7 +1023,7 @@ review:
       ${ format_time(daily_end, 'hh:mm a') }
       % elif communication == "other":
       Other: 
-      ${ other_description }
+      ${ other_description.replace("\n", " ").replace("\r", " ") }
       % endif
   - Edit: additional_time
     button: |
@@ -1076,8 +1076,8 @@ review:
       % if mediation_reason['history']:
       * There is a history of domestic violence between the parties.
       % endif
-      % if mediation_reason['history']:
-      * Other reason: ${ other_reasons } 
+      % if mediation_reason['other']:
+      * Other reason: ${ other_reasons.replace("\n", " ").replace("\r", " ") } 
       % endif
       % endif
 
