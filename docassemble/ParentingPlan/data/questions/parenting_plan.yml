@@ -1630,13 +1630,15 @@ fields:
 id: additional parenting time details
 question: |
   What else do you want to include about parenting time?
+subquestion:
+  If you need more space, you can attach additional pages to your *Parenting Plan*. 
 fields:
   - no label: additional_time_details
     datatype: area
     rows: 20
-    maxlength: 1200
+    maxlength: 1500
   - note: |
-      The form has room for about **1,200 characters** including spaces.
+      The form has room for about **1,500 characters** including spaces.
 ---
 ## 5.RIGHTS & RESPONSIBILITIES OF THE PARENTS
 id: additional terms intro
